@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1432</width>
+    <height>1036</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>991</width>
+      <height>711</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Spectrum</string>
+     </attribute>
+     <widget class="PlotWidget" name="widget" native="true">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>10</y>
+        <width>981</width>
+        <height>601</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Efficiency</string>
+     </attribute>
+     <widget class="PlotWidget" name="widget_2" native="true">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>10</y>
+        <width>981</width>
+        <height>611</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QTreeWidget" name="treeWidget">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>30</y>
+      <width>411</width>
+      <height>371</height>
+     </rect>
+    </property>
+    <column>
+     <property name="text">
+      <string>Peaks</string>
+     </property>
+    </column>
+    <item>
+     <property name="text">
+      <string>Peak1</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Background Model</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Peak Model</string>
+      </property>
+     </item>
+    </item>
+    <item>
+     <property name="text">
+      <string>Peak2</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Background Model</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Peak Model</string>
+      </property>
+     </item>
+    </item>
+   </widget>
+   <widget class="QTextBrowser" name="textBrowser">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>720</y>
+      <width>991</width>
+      <height>221</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tableWidget">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>410</y>
+      <width>411</width>
+      <height>531</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1432</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFILE">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionImport"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit_2"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuAxes">
+     <property name="title">
+      <string>axes</string>
+     </property>
+     <addaction name="actionYaxis"/>
+     <addaction name="actionXaxis"/>
+    </widget>
+    <addaction name="actionCWT"/>
+    <addaction name="menuAxes"/>
+    <addaction name="actionLines"/>
+    <addaction name="actionColor"/>
+   </widget>
+   <widget class="QMenu" name="menuFit">
+    <property name="title">
+     <string>Peaks</string>
+    </property>
+    <addaction name="actionAuto_Peaks"/>
+    <addaction name="actionAdd_Peak"/>
+    <addaction name="actionModels"/>
+    <addaction name="actionPeak_Report"/>
+   </widget>
+   <widget class="QMenu" name="menuIsotopes">
+    <property name="title">
+     <string>Isotopes</string>
+    </property>
+    <addaction name="actionLoad_Library"/>
+    <addaction name="actionIdentify_Peak"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionManual"/>
+   </widget>
+   <widget class="QMenu" name="menuCalculate">
+    <property name="title">
+     <string>Calculate</string>
+    </property>
+    <addaction name="actionActivity"/>
+   </widget>
+   <addaction name="menuFILE"/>
+   <addaction name="menuView"/>
+   <addaction name="menuFit"/>
+   <addaction name="menuIsotopes"/>
+   <addaction name="menuCalculate"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionImport"/>
+   <addaction name="actionAdd_Peak"/>
+   <addaction name="actionIdentify_Peak"/>
+  </widget>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Load</string>
+   </property>
+   <property name="toolTip">
+    <string>Open old session (ctrl+l)</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save session (ctrl+s)</string>
+   </property>
+  </action>
+  <action name="actionImport">
+   <property name="text">
+    <string>Import</string>
+   </property>
+   <property name="toolTip">
+    <string>Import channel data</string>
+   </property>
+  </action>
+  <action name="actionExit_2">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="toolTip">
+    <string>Exit (ctrl+q)</string>
+   </property>
+  </action>
+  <action name="actionCWT">
+   <property name="text">
+    <string>CWT</string>
+   </property>
+  </action>
+  <action name="actionAuto_Peaks">
+   <property name="text">
+    <string>Auto Peaks</string>
+   </property>
+   <property name="toolTip">
+    <string>Auto Peaks (ctrl+t)</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionManual">
+   <property name="text">
+    <string>Manual</string>
+   </property>
+  </action>
+  <action name="actionLoad_Library">
+   <property name="text">
+    <string>Load Library</string>
+   </property>
+  </action>
+  <action name="actionIdentify_Peak">
+   <property name="text">
+    <string>Identify Peak</string>
+   </property>
+   <property name="toolTip">
+    <string>Identify Peak (ctrl+i)</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionAdd_Peak">
+   <property name="text">
+    <string>Add Peak</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Peak (ctrl+a)</string>
+   </property>
+  </action>
+  <action name="actionActivity">
+   <property name="text">
+    <string>Activity</string>
+   </property>
+  </action>
+  <action name="actionYaxis">
+   <property name="text">
+    <string>yaxis</string>
+   </property>
+  </action>
+  <action name="actionXaxis">
+   <property name="text">
+    <string>xaxis</string>
+   </property>
+  </action>
+  <action name="actionModels">
+   <property name="text">
+    <string>Models</string>
+   </property>
+  </action>
+  <action name="actionLines">
+   <property name="text">
+    <string>markers</string>
+   </property>
+  </action>
+  <action name="actionColor">
+   <property name="text">
+    <string>colors</string>
+   </property>
+  </action>
+  <action name="actionPeak_Report">
+   <property name="text">
+    <string>Peak Report</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QWidget</extends>
+   <header>pyqtgraph</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
