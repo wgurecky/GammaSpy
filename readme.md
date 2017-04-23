@@ -18,9 +18,26 @@ Installation
 Depends:
 
 - numpy
-- pyqt
-- pyqtgraph
+- pyqt4.8+
+- pyqtgraph (https://github.com/pyqtgraph/pyqtgraph)
+- xylibi-py (https://github.com/wojdyr/xylib)
 
+
+Installing xylib-py
+-------------------
+
+via pip:
+
+    sudo pip3 install xylib-py
+
+Installing pyqtgraph
+--------------------
+
+from github:
+
+    git clone https://github.com/pyqtgraph/pyqtgraph.git
+    cd pyqtgraph
+    python3 setup.py install --user
 
 Filetype Compatibility
 =======================
