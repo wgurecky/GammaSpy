@@ -3,6 +3,7 @@
 Also allows read/write to HDF5
 """
 import os
+from six import iteritems
 import xylib
 import h5py
 import numpy as np
@@ -24,7 +25,6 @@ class DataReader(object):
         for i in range(meta.size()):
             key = meta.get_key(i)
             value = meta.get(key)
-            # f.write('# %s: %s\n' % (key, value.replace('\n', '\n#\t')))
             metadata[key] = value
         return metadata
 
@@ -34,20 +34,28 @@ class DataReader(object):
         """
         xy_data = xylib.load_file(fname)
         print("Reading data by xylib from file: %s \n" % xy_data.fi.name)
-        metadata = self._export_metadata(xy_data.meta)
         block = xy_data.get_block(i)
+        metadata_raw = self._export_metadata(block.meta)
 
         ncol = block.get_column_count()
         # column 0 is pseudo-column with point indices, we skip it
         col_names = [block.get_column(k).get_name() or ('column_%d' % k)
                      for k in range(1, ncol+1)]
         nrow = block.get_point_count()
-        count_energy = np.zeros((2, nrow))
+        count_energy = np.zeros((nrow, 2))
         for j in range(nrow):
             values = ["%.6f" % block.get_column(k).get_value(j)
                       for k in range(1, ncol+1)]
-            #f.write('\t'.join(values) + '\n')
-            count_energy[j,:] = np.array(values)
+            count_energy[j, :] = np.array([float(v) for v in values])
+        # convert raw metadata from cnf file to clean format
+        metadata = {'e_cal': []}
+        for key, val in iteritems(metadata_raw):
+            if key.split(' ')[0] == 'live':
+                metadata['l_time'] = float(val)
+            elif key.split(' ')[0] == 'real':
+                metadata['r_time'] = float(val)
+            elif key.split(' ')[0] == 'energy':
+                metadata['e_cal'].append(float(val))
         return [metadata, count_energy]
 
     def _readHDF5(self, fname, chan=0):
@@ -92,3 +100,13 @@ class DataReader(object):
         h5f.create_dataset('0/l_time', data=l_time)
         h5f.create_dataset('0/r_time', data=r_time)
         h5f.close()
+
+
+if __name__ == "__main__":
+    """!
+    @brief Run from cmd line
+    """
+    dreader = DataReader()
+    mdata, edata = dreader.read('../../examples/NORM-H2O.CNF')
+    import pdb; pdb.set_trace()
+    pass
