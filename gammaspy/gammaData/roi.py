@@ -36,6 +36,7 @@ class Roi(object):
         self.bg_model = bg.LinModel()
         self._init_params = np.concatenate((self.bg_model.params, self.peak_model.params))
         # data stor
+        self.roi_data_orig = spectrum
         self.roi_data = np.array([])
         self.update_data(spectrum)
 
@@ -56,13 +57,13 @@ class Roi(object):
         @param threshold  Threshold second deriv value at which to stop roi search
         @param wl  Number of points to include in each smoothing window
         """
-        y_2div = savgol_filter(self.roi_data[:, 1], window_length=5, polyorder=3, deriv=2)
-        roi_data_2div = np.array([self.roi_data[:, 0], y_2div]).T
+        y_2div = savgol_filter(self.roi_data_orig[:, 1], window_length=5, polyorder=3, deriv=2)
+        roi_data_2div = np.array([self.roi_data_orig[:, 0], y_2div]).T
         # start at centroid and walk left
-        l_mask = (self.roi_data[:, 0] <= self._centroid)
+        l_mask = (self.roi_data_orig[:, 0] <= self._centroid)
         l_data = roi_data_2div[l_mask]
         # start at centroid and walk right
-        r_mask = (self.roi_data[:, 0] >= self._centroid)
+        r_mask = (self.roi_data_orig[:, 0] >= self._centroid)
         r_data = roi_data_2div[r_mask]
         for i, l_2div in enumerate(l_data):
             if l_2div[1] > threshold:
@@ -72,6 +73,7 @@ class Roi(object):
             if r_2div[1] > threshold:
                 self.bg_bounds[-1] = r_2div[0] + 1.
                 break
+        self.update_data()
 
     @property
     def centroid(self):

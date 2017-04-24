@@ -53,7 +53,8 @@ class GammaSpectrum(object):
         """
         if peak_locs is None:
             peak_locs = self.peak_locs()
-        pass
+        for peak_loc in peak_locs:
+            self.peak_bank[peak_loc].find_roi()
 
     def fit_peak(self, peak_loc):
         """!
