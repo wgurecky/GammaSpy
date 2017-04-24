@@ -5,6 +5,7 @@ find all peaks in spectrum
 import peak as pk
 import roi
 import numpy as np
+from scipy.signal import find_peaks_cwt
 
 
 class GammaSpectrum(object):
@@ -28,11 +29,22 @@ class GammaSpectrum(object):
         peak_locs = np.array(self.peak_bank.keys())
         return peak_locs
 
-    def find_peaks(self):
+    def find_cwt_peaks(self, widths=[1., 2., 3., 4., 5., 7.5, 10., 15., 20., 30.], **kwargs):
         """!
-        @brief Attempt automatic peak detection.
+        @brief Automatic peak detection by the continuous wavelet transform method.
         """
+        cwt_peaks = find_peaks_cwt(self.spectrum, widths, **kwargs)
+        return cwt_peaks
+
+    def find_gradient_peaks(self, **kwargs):
         pass
+
+    def auto_peaks(self, method='cwt', **kwargs):
+        """!
+        @brief Auto find all peaks in spectrum.
+        """
+        for peak_loc in self.find_cwt_peaks(**kwargs):
+            self.add_peak(peak_loc)
 
     def auto_roi(self, peak_locs=[]):
         """!
@@ -48,4 +60,7 @@ class GammaSpectrum(object):
         @breif Fit selected peak to data.
         Simulataneously fits background and peak.
         """
-        pass
+        try:
+            self.peak_bank[peak_loc].fit()
+        except:
+            print("Peak fitting failed.")

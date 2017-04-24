@@ -6,6 +6,7 @@ from __future__ import division
 import peak
 import bg
 from scipy.odr import Model, Data, ODR
+from scipy.signal import savgol_filter
 import numpy as np
 
 
@@ -24,10 +25,10 @@ class Roi(object):
     """
     def __init__(self, spectrum, centroid=1000.):
         self._centroid = centroid
-        self.bg_bounds = [self._centroid - 50.,
-                          self._centroid - 40.,
-                          self._centroid + 40.,
-                          self._centroid + 50.]
+        self.bg_bounds = [self._centroid - 100.,
+                          self._centroid - 80.,
+                          self._centroid + 80.,
+                          self._centroid + 100.]
         self._peak_models = ["gauss"]
         self._bg_models = ["linear"]
         # composition
@@ -35,11 +36,42 @@ class Roi(object):
         self.bg_model = bg.LinModel()
         self._init_params = np.concatenate((self.bg_model.params, self.peak_model.params))
         # data stor
+        self.roi_data = np.array([])
         self.update_data(spectrum)
 
-    def update_data(self, spectrum):
+    def update_data(self, spectrum=None):
+        """!
+        @brief Updates data contained in ROI when self.bg_bounds changes
+        """
+        if spectrum is None:
+            spectrum = self.roi_data
         selection = (spectrum[:, 0] > self.bg_bounds[0]) & (spectrum[:, 0] < self.bg_bounds[-1])
         self.roi_data = spectrum[selection]
+
+    def find_roi(self, threshold=50., wl=5, **kwargs):
+        """!
+        @brief Try to auto find the ROI by walking down the peak while checking
+        the second derivative to exceed some positive threshold.
+        Optionally smooths the data first.
+        @param threshold  Threshold second deriv value at which to stop roi search
+        @param wl  Number of points to include in each smoothing window
+        """
+        y_2div = savgol_filter(self.roi_data[:, 1], window_length=5, polyorder=3, deriv=2)
+        roi_data_2div = np.array([self.roi_data[:, 0], y_2div]).T
+        # start at centroid and walk left
+        l_mask = (self.roi_data[:, 0] <= self._centroid)
+        l_data = roi_data_2div[l_mask]
+        # start at centroid and walk right
+        r_mask = (self.roi_data[:, 0] >= self._centroid)
+        r_data = roi_data_2div[r_mask]
+        for i, l_2div in enumerate(l_data):
+            if l_2div[1] > threshold:
+                self.bg_bounds[0] = l_2div[0] - 1.
+                break
+        for i, r_2div in enumerate(r_data):
+            if r_2div[1] > threshold:
+                self.bg_bounds[-1] = r_2div[0] + 1.
+                break
 
     @property
     def centroid(self):
