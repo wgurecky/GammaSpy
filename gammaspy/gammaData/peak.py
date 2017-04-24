@@ -27,8 +27,11 @@ class GaussModel(object):
 
     @params.setter
     def params(self, params):
-        assert(len(params) == 3)
-        self._params = params
+        if params is None:
+            self._params = [100., 100., 100.]
+        else:
+            assert(len(params) == 3)
+            self._params = params
 
     def eval(self, params, x):
         """!
@@ -65,6 +68,11 @@ class GaussModel(object):
         hess_matrix = nd.Hessian(reduced_int)(params)
         return hess_matrix
 
+    def int_jac(self, a, b, params):
+        reduced_int = lambda p: self.integral(a, b, p)
+        jac = nd.Jacobian(reduced_int)(params)
+        return jac
+
     def area(self, params):
         """!
         @brief  Computes area under entire gauss peak
@@ -84,6 +92,10 @@ class GaussModel(object):
         hess_matrix = nd.Hessian(self.area)(params)
         return hess_matrix
 
+    def area_jac(self, params):
+        jac = nd.Jacobian(self.area)(params)
+        return jac
+
     def fwhm(self, params):
         """!
         @brief Compute full width half max of gaussian
@@ -92,9 +104,9 @@ class GaussModel(object):
 
 class DblGaussModel(object):
     def __init__(self, init_params=[1., 1., 1., 2., 2., 2.]):
-        self.gauss_1 = GaussModel(init_params[:3])
-        self.gauss_2 = GaussModel(init_params[3:])
         self._params = init_params
+        self.gauss_1 = GaussModel(self._params[:3])
+        self.gauss_2 = GaussModel(self._params[3:])
 
     @property
     def params(self):
@@ -102,8 +114,11 @@ class DblGaussModel(object):
 
     @params.setter
     def params(self, params):
-        assert(len(params) == 6)
-        self._params = params
+        if params is None:
+            self._params = [100., 100., 100., 120, 120, 120]
+        else:
+            assert(len(params) == 6)
+            self._params = params
 
     def eval(self, params, x):
         gauss_f_1 = self.gauss_1.eval(params[:3], x)
@@ -115,6 +130,11 @@ class DblGaussModel(object):
         gauss_int_2 = self.gauss_2.integral(a, b, params[3:])
         return gauss_int_1 + gauss_int_2
 
+    def int_jac(self, a, b, params):
+        reduced_int = lambda p: self.integral(a, b, p)
+        jac = nd.Jacobian(reduced_int)(params)
+        return jac
+
     def area(self, params):
         gauss_area_1 = self.gauss_1.area(params[:3])
         gauss_area_2 = self.gauss_2.area(params[3:])
@@ -124,43 +144,31 @@ class DblGaussModel(object):
         hess_matrix = nd.Hessian(self.area)(params)
         return hess_matrix
 
+    def area_jac(self, params):
+        jac = nd.Jacobian(self.area)(params)
+        return jac
+
     def fwhm(self, params):
         return self.gauss_1.fwhm(params[:3]), self.gauss_2.fwhm(params[3:])
 
 
-class GammaPeak(object):
-    def __init__(self, peak_loc, bg_model='linear', peak_model='gauss', **kwargs):
-        # peak loc estimated by peak location tool
-        self.peak_loc = peak_loc
-        # self.roi = roi.Roi(peak_loc)
-        self.background_model_name = bg_model
-        self.peak_model_name = peak_model
-        self.model_params = None
-
-    def fit(self):
-        """!
-        @brief Perform orthogonal dist regression by ODR pack.
-        Fit a linear combination of background model and peak model
-        to data in current ROI.
-        """
-        n_peak_params = 0
-        n_bg_params = 0
-        pass
-
-    def print_params(self):
-        """!
-        @brief Pretty-print fitted parameters to table
-        """
-        pass
-
-
-def pfactory(name, **kwargs):
+def peak_model_factory(name, **kwargs):
+    """!
+    @brief Given string, return correct peak class.
+    @param name String.  "gauss" or "dblgauss"
+    @return GaussModel instance
+    """
+    init_params = kwargs.pop("params", None)
     if name == "gauss":
-        return GammaPeak(**kwargs)
+        return GaussModel(init_params)
+    elif name == "dblgauss":
+        return DblGaussModel(init_params)
     else:
-        raise ValueError
+        return GaussModel(init_params)
+
 
 if __name__ == "__main__":
     gs = GaussModel()
     print(gs.area([4.,4.,4.]))
     print(gs.integral(-20., 20., [4., 4., 4.]))
+    print(gs.area_jac([4., 4., 4.]))

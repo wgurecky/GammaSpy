@@ -56,6 +56,14 @@ class Roi(object):
         """
         return self._peak_models
 
+    @property
+    def bg_bounds(self):
+        """!
+        @brief Background bounds.
+        """
+        # (bgl_lower, bgl_upper, bgr_lower, bgr_upper)
+        return self._bg_bounds
+
     @bg_bounds.setter
     def bg_bounds(self, bg_bounds_in):
         """!
@@ -65,14 +73,6 @@ class Roi(object):
             return ValueError("Must specify length 4 tuple")
         else:
             self._bg_bounds = bg_bounds_in
-
-    @property
-    def bg_bounds(self):
-        """!
-        @brief Background bounds.
-        """
-        # (bgl_lower, bgl_upper, bgr_lower, bgr_upper)
-        return self._bg_bounds
 
     def net_area(self):
         """!
@@ -88,7 +88,7 @@ class Roi(object):
 
     def fit(self, method="SLSQP", peak=True, bgrnd=True, *args0):
         """!
-        @brief Fit peak model by maximum liklihood /
+        @brief Fit peak model
         non linear least squares.
         Simulataneously fits background and peak or p
         """
