@@ -3,15 +3,164 @@
 Contains peak model def
 """
 from __future__ import division
+import numpy as np
+import numdifftools as nd
+from scipy.special import erf
+
+
+class GaussModel(object):
+    """!
+    @brief Gaussian model of the form:
+    \f[
+    y(x) = a\ e^{\frac{-(x - b)^2}{2c^2}}
+    \f]
+    Where $a$ is the scaling factor
+    $b$ is the mean
+    and $c$ is the std. deviation.
+    """
+    def __init__(self, init_params=[1., 1., 1.]):
+        self._params = init_params
+
+    @property
+    def params(self):
+        return self._params
+
+    @params.setter
+    def params(self, params):
+        assert(len(params) == 3)
+        self._params = params
+
+    def eval(self, params, x):
+        """!
+        @brief Gauss model definition.
+        @param params  Gaussian model parameter array (len=3)
+        @param x np_array of abscissa to evaluate gauss model at
+        @return np_array value of gauss model at specified points.
+        """
+        gauss_f = params[0] * np.exp((-1. * (x - params[1]) ** 2) / (2. * params[2] ** 2))
+        return gauss_f
+
+    def integral(self, a, b, params):
+        """!
+        @brief Compute definite integral of general gaussian model.
+        @param a Start.
+        @param b End.
+        @param params  Gaussian model parameter array (len=3)
+        """
+        a = np.sqrt(np.pi / 2.) * -params[0] * params[2]
+        b_f = erf((params[1] - b) / (np.sqrt(2.) * params[2]))
+        b_i = erf((params[1] - a) / (np.sqrt(2.) * params[2]))
+        return a * (b_f - b_i)
+
+    def int_hess(self, a, b, params):
+        """!
+        @brief Computes hessian of gaussian integral for
+        area uncertainty calculations.
+        \f[
+        H^-1 \approx C
+        \f]
+        Where $C$ is the covar matrix and $H$ is the hessian.
+        """
+        reduced_int = lambda p: self.integral(a, b, p)
+        hess_matrix = nd.Hessian(reduced_int)(params)
+        return hess_matrix
+
+    def area(self, params):
+        """!
+        @brief  Computes area under entire gauss peak
+        on $(-\infty, \infty)$.
+        \f[
+        A = H * sigma * sqrt(2 *\pi)
+        \f]
+        Where $H=f(\mu)$
+        """
+        ar = self.eval(params, params[1]) * params[2] * np.sqrt(2. * np.pi)
+        return ar
+
+    def area_hess(self, params):
+        """!
+        @brief Compute hessian of gaussian area function
+        """
+        hess_matrix = nd.Hessian(self.area)(params)
+        return hess_matrix
+
+    def fwhm(self, params):
+        """!
+        @brief Compute full width half max of gaussian
+        """
+        return 2.35482 * params[2]
+
+class DblGaussModel(object):
+    def __init__(self, init_params=[1., 1., 1., 2., 2., 2.]):
+        self.gauss_1 = GaussModel(init_params[:3])
+        self.gauss_2 = GaussModel(init_params[3:])
+        self._params = init_params
+
+    @property
+    def params(self):
+        return self._params
+
+    @params.setter
+    def params(self, params):
+        assert(len(params) == 6)
+        self._params = params
+
+    def eval(self, params, x):
+        gauss_f_1 = self.gauss_1.eval(params[:3], x)
+        gauss_f_2 = self.gauss_2.eval(params[3:], x)
+        return gauss_f_1 + gauss_f_2
+
+    def integral(self, a, b, params):
+        gauss_int_1 = self.gauss_1.integral(a, b, params[:3])
+        gauss_int_2 = self.gauss_2.integral(a, b, params[3:])
+        return gauss_int_1 + gauss_int_2
+
+    def area(self, params):
+        gauss_area_1 = self.gauss_1.area(params[:3])
+        gauss_area_2 = self.gauss_2.area(params[3:])
+        return gauss_area_1 + gauss_area_2
+
+    def area_hess(self, params):
+        hess_matrix = nd.Hessian(self.area)(params)
+        return hess_matrix
+
+    def fwhm(self, params):
+        return self.gauss_1.fwhm(params[:3]), self.gauss_2.fwhm(params[3:])
+
+
+class GammaPeak(object):
+    def __init__(self, peak_loc, bg_model='linear', peak_model='gauss', **kwargs):
+        # peak loc estimated by peak location tool
+        self.peak_loc = peak_loc
+        # self.roi = roi.Roi(peak_loc)
+        self.background_model_name = bg_model
+        self.peak_model_name = peak_model
+        self.model_params = None
+
+    def fit(self):
+        """!
+        @brief Perform orthogonal dist regression by ODR pack.
+        Fit a linear combination of background model and peak model
+        to data in current ROI.
+        """
+        n_peak_params = 0
+        n_bg_params = 0
+        pass
+
+    def print_params(self):
+        """!
+        @brief Pretty-print fitted parameters to table
+        """
+        pass
 
 
 def pfactory(name, **kwargs):
     if name == "gauss":
-        return PeakGauss(**kwargs)
+        return GammaPeak(**kwargs)
     else:
         raise ValueError
 
-
-class PeakGauss(name):
-    def __init__(self, **kwargs):
-        pass
+if __name__ == "__main__":
+    gs = GaussModel()
+    print(gs.area([4.,4.,4.]))
+    print(gs.integral(-20., 20., [4., 4., 4.]))

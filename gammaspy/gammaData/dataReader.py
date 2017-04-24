@@ -33,7 +33,7 @@ class DataReader(object):
         @brief Read data from CNF file
         """
         xy_data = xylib.load_file(fname)
-        print("Reading data by xylib from file: %s \n" % xy_data.fi.name)
+        print("Reading data by xylib from file format: %s \n" % xy_data.fi.name)
         block = xy_data.get_block(i)
         metadata_raw = self._export_metadata(block.meta)
 
@@ -84,21 +84,19 @@ class DataReader(object):
             return self._readHDF5(fname, chan)
         return self._readXY(fname)
 
-    def write(self, fname, e_cal, l_time, r_time, spectrum, peak_info=None):
+    def write(self, fname, metadata, spectrum, peak_info=None):
         """!
         @brief Write spectrum data and fitted peak info to HDF5 file
-        @param fname
-        @param e_cal Float.
-        @param l_time Float live time
-        @param r_time float real time
+        @param fname String.  output filename
+        @param metadata dict.
         @param spectrum  Numpy 2D array (counts vs energy)
         @param peak_info array of peak parameters
         """
         h5f = h5py.File(fname, 'w')
         h5f.create_dataset('0/spectrum', data=spectrum)
-        h5f.create_dataset('0/e_cal', data=e_cal)
-        h5f.create_dataset('0/l_time', data=l_time)
-        h5f.create_dataset('0/r_time', data=r_time)
+        h5f.create_dataset('0/e_cal', data=metadata['e_cal'])
+        h5f.create_dataset('0/l_time', data=metadata['l_time'])
+        h5f.create_dataset('0/r_time', data=metadata['r_time'])
         h5f.close()
 
 
@@ -107,6 +105,6 @@ if __name__ == "__main__":
     @brief Run from cmd line
     """
     dreader = DataReader()
-    mdata, edata = dreader.read('../../examples/NORM-H2O.CNF')
-    import pdb; pdb.set_trace()
-    pass
+    mdata, edata = dreader.read('../../examples/data/NORM-H2O.CNF')
+    # write to h5 file
+    dreader.write('testout.h5', mdata, edata)
