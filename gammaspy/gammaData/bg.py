@@ -11,7 +11,7 @@ class LinModel(object):
     """!
     @brief Linear background model.
     """
-    def __init__(self, init_params=[1., 1.]):
+    def __init__(self, init_params=[0., 100.]):
         self._params = init_params
 
     @property
@@ -30,6 +30,10 @@ class LinModel(object):
         """!
         @brief Evaluate the linear background model
         """
+        model_f = params[0] * x + params[1]
+        return model_f
+
+    def opti_eval(self, x, *params):
         model_f = params[0] * x + params[1]
         return model_f
 

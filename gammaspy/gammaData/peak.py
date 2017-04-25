@@ -43,6 +43,10 @@ class GaussModel(object):
         gauss_f = params[0] * np.exp((-1. * (x - params[1]) ** 2) / (2. * params[2] ** 2))
         return gauss_f
 
+    def opti_eval(self, x, *params):
+        gauss_f = params[0] * np.exp((-1. * (x - params[1]) ** 2) / (2. * params[2] ** 2))
+        return gauss_f
+
     def integral(self, a, b, params):
         """!
         @brief Compute definite integral of general gaussian model.

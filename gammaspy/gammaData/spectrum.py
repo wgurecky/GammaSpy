@@ -45,14 +45,15 @@ class GammaSpectrum(object):
         """!
         @brief Automatic peak detection by the continuous wavelet transform method.
         """
-        noise = kwargs.get("noise_perc", 8)
-        min_snr = kwargs.get("min_snr", 1.4)
+        noise = kwargs.get("noise_perc", 20)
+        min_snr = kwargs.get("min_snr", 1.5)
+        cut = kwargs.pop("cut", 40)  # max number of peaks to retain
         cwt_peaks_idxs = find_peaks_cwt(self.spectrum[:, 1], widths, min_snr=min_snr, noise_perc=noise, **kwargs)
         print("N auto Peak Locations = %d" % len(cwt_peaks_idxs))
         print("-----------------------")
         cwt_peaks = self.spectrum[cwt_peaks_idxs, 0]
         print(cwt_peaks)
-        return cwt_peaks
+        return cwt_peaks[:cut]
 
     def find_gradient_peaks(self, **kwargs):
         pass
