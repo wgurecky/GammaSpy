@@ -86,7 +86,7 @@ class GaussModel(object):
         \f]
         Where $H=f(\mu)$
         """
-        ar = self.eval(params, params[1]) * params[2] * np.sqrt(2. * np.pi)
+        ar = self.eval(params, params[1]) * np.abs(params[2]) * np.sqrt(2. * np.pi)
         return ar
 
     def area_hess(self, params):
