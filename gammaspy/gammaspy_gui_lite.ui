@@ -35,7 +35,7 @@
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>1131</width>
+        <width>1121</width>
         <height>861</height>
        </rect>
       </property>
@@ -118,6 +118,39 @@
        <string>Clean Plot</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="pushShowPeaks">
+      <property name="geometry">
+       <rect>
+        <x>940</x>
+        <y>880</y>
+        <width>101</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Show Peaks</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="listWidget">
+      <property name="geometry">
+       <rect>
+        <x>1140</x>
+        <y>10</y>
+        <width>256</width>
+        <height>511</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="textBrowser">
+      <property name="geometry">
+       <rect>
+        <x>1140</x>
+        <y>540</y>
+        <width>256</width>
+        <height>391</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tabEff">
      <attribute name="title">
@@ -161,6 +194,7 @@
     <addaction name="actionAdd_Peak"/>
     <addaction name="actionModels"/>
     <addaction name="actionPeak_Report"/>
+    <addaction name="actionDelete_Peak"/>
    </widget>
    <widget class="QMenu" name="menuIsotopes">
     <property name="title">
@@ -315,6 +349,14 @@
   <action name="actionPeak_Report">
    <property name="text">
     <string>Peak Report</string>
+   </property>
+  </action>
+  <action name="actionDelete_Peak">
+   <property name="text">
+    <string>Delete Peak</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
  </widget>

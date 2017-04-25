@@ -22,18 +22,36 @@ class GammaSpectrum(object):
         """
         pass
 
-    def del_peak(self, peak_loc):
-        return self.peak_bank.pop(peak_loc, None)
+    def pop_peak(self, peak_loc):
+        """!
+        @brief Deletes and returns peak.
+        """
+        popped_peak = self.peak_bank.pop(peak_loc, None)
+        print("-----------------------------------------")
+        print("Removed Peak: %f " % popped_peak.centroid)
+        print(popped_peak)
+        print("Remaining Peaks:")
+        print(self.peak_bank.keys())
+        print("-----------------------------------------")
+
+    def del_all_peaks(self):
+        self.peak_bank = {}
 
     def peak_locs(self):
         peak_locs = np.array(self.peak_bank.keys())
         return peak_locs
 
-    def find_cwt_peaks(self, widths=[1., 2., 3., 4., 5., 7.5, 10., 15., 20., 30.], **kwargs):
+    def find_cwt_peaks(self, widths=[5.0, 7.5, 10., 15., 20., 25.], **kwargs):
         """!
         @brief Automatic peak detection by the continuous wavelet transform method.
         """
-        cwt_peaks = find_peaks_cwt(self.spectrum, widths, **kwargs)
+        noise = kwargs.get("noise_perc", 8)
+        min_snr = kwargs.get("min_snr", 1.4)
+        cwt_peaks_idxs = find_peaks_cwt(self.spectrum[:, 1], widths, min_snr=min_snr, noise_perc=noise, **kwargs)
+        print("N auto Peak Locations = %d" % len(cwt_peaks_idxs))
+        print("-----------------------")
+        cwt_peaks = self.spectrum[cwt_peaks_idxs, 0]
+        print(cwt_peaks)
         return cwt_peaks
 
     def find_gradient_peaks(self, **kwargs):
