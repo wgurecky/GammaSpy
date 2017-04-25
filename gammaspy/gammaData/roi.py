@@ -151,6 +151,7 @@ class Roi(object):
         def opti_model(x, *params):
             return self.bg_model.opti_eval(x, *params[:bgn]) + self.peak_model.opti_eval(x, *params[bgn:])
         self.popt, self.pcov = curve_fit(opti_model, x, y, p0=self._init_params)
+        self.perr = np.sqrt(np.diag(pcov))
         print("================================")
         print("Scipy optimal coeffs: ")
         print(self.popt)
@@ -158,12 +159,24 @@ class Roi(object):
         print(self.pcov)
         print("================================")
         self.y_hat = self.tot_model(self.popt, self.roi_data[:, 0])
+        self.net_area()
 
     def net_area(self):
         """!
         @brief Peak - Background
         """
-        pass
+        area_peak = self.peak_model.area(self.popt)
+        area_bg = self.bg_model.integral(self.lbound, self.ubound, self.popt)
+        net = area_peak - area_bg
+        # uncertainty calc
+        area_peak_jac = self.peak_model.area_jac(self.popt)
+        area_bg_jac = self.bg_model.int_jac(self.lbound, self.ubound, self.popt)
+        all_jac = np.concatenate((area_bg_jac, area_peak_jac))
+        # std prop of uncetainty J * C * J.T
+        uncert = np.dot(all_jac, self.pcov)
+        uncert = np.dot(uncert, all_jac.T)
+        print("Area Uncert: ")
+        print(np.sqrt(uncert))
 
     def total_area(self):
         """!
