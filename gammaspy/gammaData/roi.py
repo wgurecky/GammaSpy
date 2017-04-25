@@ -172,7 +172,10 @@ class Roi(object):
         # uncertainty calc
         area_peak_jac = self.peak_model.area_jac(self.popt[bgn:])
         area_bg_jac = self.bg_model.int_jac(self.lbound, self.ubound, self.popt[:bgn])
-        all_jac = np.concatenate((area_bg_jac[0], area_peak_jac[0]))
+        if len(area_peak_jac.shape) == 2:
+            all_jac = np.concatenate((area_bg_jac[0], area_peak_jac[0]))
+        else:
+            all_jac = np.concatenate((area_bg_jac, area_peak_jac))
         # std prop of uncetainty J * C * J.T
         uncert = np.dot(all_jac, self.pcov)
         uncert = np.dot(uncert, all_jac.T)

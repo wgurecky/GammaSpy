@@ -79,6 +79,8 @@ class DataReader(object):
         @brief Read external CNF or HDF5 file into numpy arrays
         @return [metadata, count_energy]
         """
+        if type(fname) is tuple:
+            fname = fname[0]
         _, ext = os.path.splitext(fname)
         if ext == '.h5' or ext == '.hdf5':
             return self._readHDF5(fname, chan)
