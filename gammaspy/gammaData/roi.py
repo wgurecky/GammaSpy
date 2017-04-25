@@ -3,8 +3,8 @@
 Contains region of interest model def
 """
 from __future__ import division
-import peak
-import bg
+import gammaData.peak as peak
+import gammaData.bg as bg
 from scipy.odr import Model, Data, ODR
 from scipy.signal import savgol_filter
 import numpy as np

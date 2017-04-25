@@ -69,8 +69,8 @@ class DataReader(object):
         count_energy = h5f[str(chan) + '/spectrum'][:]
         metadata = {}
         metadata['e_cal'] = h5f[str(chan) + '/e_cal'][:]
-        metadata['live_time'] = h5f[str(chan) + '/l_time'][:]
-        metadata['real_time'] = h5f[str(chan) + '/r_time'][:]
+        metadata['live_time'] = h5f[str(chan) + '/l_time']
+        metadata['real_time'] = h5f[str(chan) + '/r_time']
         h5f.close()
         return [metadata, count_energy]
 
