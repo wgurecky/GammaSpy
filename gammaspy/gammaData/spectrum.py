@@ -2,8 +2,8 @@
 @brief Defines spectrum actions such as
 find all peaks in spectrum
 """
-import gammaData.peak as pk
-import gammaData.roi as roi
+import gammaspy.gammaData.peak as pk
+import gammaspy.gammaData.roi as roi
 import numpy as np
 from scipy.signal import find_peaks_cwt
 

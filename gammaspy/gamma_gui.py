@@ -7,7 +7,7 @@ import numpy as np
 import os
 import sys
 # gammaspy imports
-from gammaData import reader, spectrum
+from gammaspy.gammaData import reader, spectrum
 
 
 ## Define main window class from template
