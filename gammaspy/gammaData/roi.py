@@ -9,6 +9,7 @@ from scipy.odr import Model, Data, ODR
 from scipy.signal import savgol_filter
 from scipy.optimize import curve_fit
 import numpy as np
+np.set_printoptions(linewidth=200)
 
 
 class Roi(object):
@@ -155,14 +156,15 @@ class Roi(object):
             return self.bg_model.opti_eval(x, *params[:bgn]) + self.peak_model.opti_eval(x, *params[bgn:])
         self.popt, self.pcov = curve_fit(opti_model, x, y, p0=self._init_params)
         self.perr = np.sqrt(np.diag(self.pcov))
-        print("================================")
-        print("Scipy optimal coeffs: ")
-        print(self.popt)
-        print("Scipy coeff covar matrix: ")
-        print(self.pcov)
-        print("================================")
+        msg = "============FIT PEAK=============\n "
+        msg += "Optimal coeffs: \n "
+        msg += str(self.popt); msg += "\n "
+        msg += "Coeff covar matrix: \n "
+        msg += str(self.pcov); msg += "\n "
         self.y_hat = self.tot_model(self.popt, self.roi_data[:, 0])
-        self.net_area()
+        msg += self.net_area(); msg += "\n "
+        msg += "================================ \n "
+        return msg
 
     def net_area(self):
         """!
@@ -182,7 +184,8 @@ class Roi(object):
         # std prop of uncetainty J * C * J.T
         uncert = np.dot(all_jac, self.pcov)
         uncert = np.dot(uncert, all_jac.T)
-        print("Area= %f +/- %f (1sigma) " % (net, np.sqrt(np.sum(uncert))))
+        msg = "Area= %f +/- %f (1sigma) " % (net, np.sqrt(np.sum(uncert)))
+        return msg
 
     def total_area(self):
         """!

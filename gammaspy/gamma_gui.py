@@ -33,6 +33,9 @@ class MainWindow(TemplateBaseClass):
         self.proxy = pg.SignalProxy(self.ui.plotSpectrum.scene().sigMouseMoved,
                                     rateLimit=60, slot=self.mouseMoved)
         self.ui.listWidget.currentItemChanged.connect(self.list_item_clicked)
+        self.ui.textBrowser.setWordWrapMode(0)
+        self.ui.textBrowser.setFontPointSize(8.)
+        self.ui.textBrowser.setReadOnly(True)
 
     def setup_menu_items(self):
         """!
@@ -233,12 +236,14 @@ class MainWindow(TemplateBaseClass):
 
     def fit_selected_peak(self):
         if hasattr(self, 'selected_peak'):
-            self.selected_peak.fit()
+            msg = self.selected_peak.fit()
             y = self.selected_peak.y_hat
             x = self.selected_peak.roi_data[:, 0]
             fit_plot = pg.PlotCurveItem(x=x, y=y, pen='r')
             self.ui.plotSpectrum.addItem(fit_plot)
-            self.ui.textBrowser.insertPlainText("Peak Fit \n")
+            self.ui.textBrowser.insertPlainText(msg)
+            self.ui.textBrowser.verticalScrollBar().setValue(
+                self.ui.textBrowser.verticalScrollBar().maximum())
 
     def selected_peak_fit_roi(self):
         if hasattr(self, 'selected_peak'):
