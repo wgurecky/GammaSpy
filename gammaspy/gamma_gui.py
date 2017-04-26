@@ -54,6 +54,7 @@ class MainWindow(TemplateBaseClass):
         """!
         @brief Connects buttons to actions
         """
+        self.ui.pushFitROI.clicked.connect(self.selected_peak_fit_roi)
         self.ui.pushDelPeak.clicked.connect(self.delete_list_item)
         self.ui.pushFitPeak.clicked.connect(self.fit_selected_peak)
         self.ui.pushClean.clicked.connect(self.clean_plot)
@@ -237,6 +238,14 @@ class MainWindow(TemplateBaseClass):
             x = self.selected_peak.roi_data[:, 0]
             fit_plot = pg.PlotCurveItem(x=x, y=y, pen='r')
             self.ui.plotSpectrum.addItem(fit_plot)
+            self.ui.textBrowser.insertPlainText("Peak Fit \n")
+
+    def selected_peak_fit_roi(self):
+        if hasattr(self, 'selected_peak'):
+            self.selected_peak.find_roi()
+            # redaw roi
+            current_item = self.ui.listWidget.currentItem()
+            self.list_item_clicked(current_item)
 
     def import_file(self):
         """!

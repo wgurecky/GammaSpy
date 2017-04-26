@@ -68,16 +68,17 @@ class Roi(object):
         selection = (spectrum[:, 0] > self.bg_bounds[0]) & (spectrum[:, 0] < self.bg_bounds[-1])
         self.roi_data = spectrum[selection]
 
-    def find_roi(self, threshold=50., wl=5, **kwargs):
+    def find_roi(self, threshold=50., wl=5, tailbuf=4., **kwargs):
         """!
         @brief Try to auto find the ROI by walking down the peak while checking
         the second derivative to exceed some positive threshold.
         Optionally smooths the data first.
         @param threshold  Threshold second deriv value at which to stop roi search
         @param wl  Number of points to include in each smoothing window
+        @param tailbuf  Float. Extra roi tail length in (KeV)
         """
-        y_2div = savgol_filter(self.roi_data_orig[:, 1], window_length=5, polyorder=3, deriv=2)
-        y_1div = savgol_filter(self.roi_data_orig[:, 1], window_length=5, polyorder=3, deriv=1)
+        y_2div = savgol_filter(self.roi_data_orig[:, 1], window_length=wl, polyorder=3, deriv=2)
+        # y_1div = savgol_filter(self.roi_data_orig[:, 1], window_length=wl, polyorder=3, deriv=1)
         roi_data_2div = np.array([self.roi_data_orig[:, 0], y_2div]).T
         # start at centroid and walk left
         l_mask = (self.roi_data_orig[:, 0] <= self._centroid)
@@ -85,15 +86,17 @@ class Roi(object):
         # start at centroid and walk right
         r_mask = (self.roi_data_orig[:, 0] >= self._centroid)
         r_data = roi_data_2div[r_mask]
-        for i, l_2div in enumerate(l_data):
+        for i, l_2div in enumerate(l_data[::-1]):
             if l_2div[1] > threshold:
-                self.bg_bounds[0] = l_2div[0] - 1.
+                self.lbound = l_2div[0] - tailbuf
                 break
         for i, r_2div in enumerate(r_data):
             if r_2div[1] > threshold:
-                self.bg_bounds[-1] = r_2div[0] + 1.
+                self.ubound = r_2div[0] + tailbuf
                 break
-        self.update_data()
+        # self.update_data()
+        print("Done fitting ROI")
+        print("Lower Bound: %f, Upper Bound: %f" % (self.lbound, self.ubound))
 
     @property
     def centroid(self):
@@ -179,7 +182,6 @@ class Roi(object):
         # std prop of uncetainty J * C * J.T
         uncert = np.dot(all_jac, self.pcov)
         uncert = np.dot(uncert, all_jac.T)
-        print(uncert)
         print("Area= %f +/- %f (1sigma) " % (net, np.sqrt(np.sum(uncert))))
 
     def total_area(self):
