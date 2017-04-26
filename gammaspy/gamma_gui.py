@@ -81,12 +81,12 @@ class MainWindow(TemplateBaseClass):
 
     def clean_plot(self):
         if hasattr(self, 'spectrum'):
-            # self.ui.plotSpectrum.clear()
-            self.ui.plotSpectrum.plot(self.spectrum.spectrum, clean=True, clickable=True)
             for item in self.ui.plotSpectrum.allChildItems():
-                if type(item) == pg.graphicsItems.InfiniteLine.InfiniteLine:
+                if type(item) == pg.graphicsItems.InfiniteLine.InfiniteLine or \
+                        type(item) == pg.graphicsItems.PlotCurveItem.PlotCurveItem:
                     print("cleaned: %s" % type(item))
                     self.ui.plotSpectrum.removeItem(item)
+            self.ui.plotSpectrum.plot(self.spectrum.spectrum, clean=True, clickable=True)
             self.label = pg.LabelItem()
             self.ui.plotSpectrum.addItem(self.label)
 
