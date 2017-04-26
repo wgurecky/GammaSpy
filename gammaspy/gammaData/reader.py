@@ -95,7 +95,7 @@ class DataReader(object):
         @param peak_info array of peak parameters
         """
         h5f = h5py.File(fname, 'w')
-        h5f.create_dataset('0/spectrum', data=spectrum)
+        h5f.create_dataset('0/spectrum', data=spectrum, compression="gzip", compression_opts=9)
         h5f.create_dataset('0/e_cal', data=metadata['e_cal'])
         h5f.create_dataset('0/l_time', data=metadata['l_time'])
         h5f.create_dataset('0/r_time', data=metadata['r_time'])

@@ -9,8 +9,9 @@ from scipy.signal import find_peaks_cwt
 
 
 class GammaSpectrum(object):
-    def __init__(self, spectrum):
+    def __init__(self, spectrum=np.array([]), metadata={}):
         self.spectrum = spectrum
+        self.metadata = metadata
         self.peak_bank = {}
 
     def add_peak(self, peak_loc, peak_model='gauss', bg_model='linear'):

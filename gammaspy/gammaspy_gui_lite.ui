@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1432</width>
+    <width>1430</width>
     <height>1036</height>
    </rect>
   </property>
@@ -35,8 +35,8 @@
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>1121</width>
-        <height>861</height>
+        <width>1031</width>
+        <height>871</height>
        </rect>
       </property>
      </widget>
@@ -64,19 +64,6 @@
       </property>
       <property name="text">
        <string>Delete Peak</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="toolManualROI">
-      <property name="geometry">
-       <rect>
-        <x>190</x>
-        <y>890</y>
-        <width>101</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Manual ROI</string>
       </property>
      </widget>
      <widget class="QToolButton" name="pushFitPeak">
@@ -108,10 +95,10 @@
      <widget class="QPushButton" name="pushClean">
       <property name="geometry">
        <rect>
-        <x>1050</x>
-        <y>880</y>
+        <x>960</x>
+        <y>890</y>
         <width>81</width>
-        <height>51</height>
+        <height>41</height>
        </rect>
       </property>
       <property name="text">
@@ -121,34 +108,103 @@
      <widget class="QPushButton" name="pushShowPeaks">
       <property name="geometry">
        <rect>
-        <x>940</x>
-        <y>880</y>
+        <x>850</x>
+        <y>890</y>
         <width>101</width>
-        <height>51</height>
+        <height>41</height>
        </rect>
       </property>
       <property name="text">
        <string>Show Peaks</string>
       </property>
      </widget>
+     <widget class="QTextBrowser" name="textBrowser">
+      <property name="geometry">
+       <rect>
+        <x>1055</x>
+        <y>540</y>
+        <width>341</width>
+        <height>391</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="cwt1">
+      <property name="geometry">
+       <rect>
+        <x>1280</x>
+        <y>420</y>
+        <width>113</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="cwt2">
+      <property name="geometry">
+       <rect>
+        <x>1280</x>
+        <y>450</y>
+        <width>113</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="cwt3">
+      <property name="geometry">
+       <rect>
+        <x>1280</x>
+        <y>480</y>
+        <width>113</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="cwt4">
+      <property name="geometry">
+       <rect>
+        <x>1280</x>
+        <y>510</y>
+        <width>113</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>1280</x>
+        <y>400</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>CWT Control</string>
+      </property>
+     </widget>
      <widget class="QListWidget" name="listWidget">
       <property name="geometry">
        <rect>
-        <x>1140</x>
-        <y>10</y>
-        <width>256</width>
+        <x>1060</x>
+        <y>20</y>
+        <width>151</width>
         <height>511</height>
        </rect>
       </property>
      </widget>
-     <widget class="QTextBrowser" name="textBrowser">
+     <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>1140</x>
-        <y>540</y>
-        <width>256</width>
-        <height>391</height>
+        <x>1060</x>
+        <y>0</y>
+        <width>101</width>
+        <height>20</height>
        </rect>
+      </property>
+      <property name="text">
+       <string>Peak List</string>
       </property>
      </widget>
     </widget>
@@ -164,7 +220,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1432</width>
+     <width>1430</width>
      <height>29</height>
     </rect>
    </property>
@@ -191,10 +247,13 @@
      <string>Peaks</string>
     </property>
     <addaction name="actionAuto_Peaks"/>
-    <addaction name="actionAdd_Peak"/>
+    <addaction name="actionMark_Peak"/>
     <addaction name="actionModels"/>
     <addaction name="actionPeak_Report"/>
     <addaction name="actionDelete_Peak"/>
+    <addaction name="actionDelete_All_Peaks"/>
+    <addaction name="actionNext_Peak"/>
+    <addaction name="actionPrev_Peak"/>
    </widget>
    <widget class="QMenu" name="menuIsotopes">
     <property name="title">
@@ -315,9 +374,9 @@
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionAdd_Peak">
+  <action name="actionMark_Peak">
    <property name="text">
-    <string>Add Peak</string>
+    <string>Mark Peak</string>
    </property>
    <property name="toolTip">
     <string>Add Peak (ctrl+a)</string>
@@ -357,6 +416,27 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionDelete_All_Peaks">
+   <property name="text">
+    <string>Delete All Peaks</string>
+   </property>
+  </action>
+  <action name="actionNext_Peak">
+   <property name="text">
+    <string>Next Peak</string>
+   </property>
+   <property name="shortcut">
+    <string>J</string>
+   </property>
+  </action>
+  <action name="actionPrev_Peak">
+   <property name="text">
+    <string>Prev Peak</string>
+   </property>
+   <property name="shortcut">
+    <string>K</string>
    </property>
   </action>
  </widget>
