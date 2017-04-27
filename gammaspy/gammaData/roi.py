@@ -148,7 +148,8 @@ class Roi(object):
         """
         x = self.roi_data[:, 0]
         y = self.roi_data[:, 1]
-        self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params)
+        self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params, sigma=np.sqrt(y), absolute_sigma=True)
+        #self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params)
         self.perr = np.sqrt(np.diag(self.pcov))
         self.model.set_params(self.popt)
         msg = "============FIT NEW PEAK=============\n "
