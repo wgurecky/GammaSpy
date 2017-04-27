@@ -4,6 +4,8 @@ About
 GammaSpy is a gamma ray spectroscopy peak visualization, finding, and
 fitting application.
 
+![screenshot](https://github.com/wgurecky/GammaSpy/blob/master/doc/images/sshot_1_sm.png)
+
 Todo
 -------------
 - Energy efficiency
