@@ -28,6 +28,7 @@ class MainWindow(TemplateBaseClass):
         self.setup_plot()
         self.setup_menu_items()
         self.setup_buttons()
+        self.setup_inputs()
         # internal data
         self.last_clicked = []
         self.proxy = pg.SignalProxy(self.ui.plotSpectrum.scene().sigMouseMoved,
@@ -64,6 +65,38 @@ class MainWindow(TemplateBaseClass):
         self.ui.pushShowPeaks.clicked.connect(self.show_peak_locs)
         self.ui.toolAddPeak.clicked.connect(self.manual_add_peak)
 
+    def setup_inputs(self):
+        # defaults
+        self.ui.cwt1.setText(str(10.))
+        self.ui.cwt2.setText(str(2000.))
+        self.ui.cwt3.setText(str(1.2))
+        self.ui.cwt4.setText(str(7.))
+        self.ui.roi1.setText(str(50.))
+        self.ui.roi2.setText(str(4.))
+        # events on change
+        self.ui.cwt1.editingFinished.connect(self.update_cwt_settings)
+        self.ui.cwt2.editingFinished.connect(self.update_cwt_settings)
+        self.ui.cwt3.editingFinished.connect(self.update_cwt_settings)
+        self.ui.cwt4.editingFinished.connect(self.update_cwt_settings)
+        self.update_cwt_settings()
+        self.ui.roi1.editingFinished.connect(self.update_roi_settings)
+        self.ui.roi2.editingFinished.connect(self.update_roi_settings)
+        self.update_roi_settings()
+
+    def update_cwt_settings(self):
+        self.cwt_settings = {}
+        try:
+            self.cwt_settings["ei"] = float(self.ui.cwt1.text())
+            self.cwt_settings["ef"] = float(self.ui.cwt2.text())
+            self.cwt_settings["min_snr"] = float(self.ui.cwt3.text())
+            self.cwt_settings["noise_perc"] = float(self.ui.cwt4.text())
+        except:
+            print("Invalid entry")
+
+    def update_roi_settings(self):
+        self.roi_settings = {}
+        pass
+
     def manual_add_peak(self):
         if self.current_vline_loc:
             print("adding peak at E= %f (keV)" % self.current_vline_loc)
@@ -75,7 +108,7 @@ class MainWindow(TemplateBaseClass):
         @brief Runs automated peak finding routine.  Adds
         all found peaks to the peak_bank
         """
-        self.spectrum.auto_peaks()
+        self.spectrum.auto_peaks('cwt', **self.cwt_settings)
         # show the peaks
         self.show_peak_locs()
         self.update_list_item_db()
@@ -194,6 +227,7 @@ class MainWindow(TemplateBaseClass):
     def del_all_peaks(self):
         self.ui.listWidget.clear()
         self.spectrum.peak_bank = {}
+        self.clean_plot()
 
     def del_selected_peak_line(self):
         if hasattr(self, 'selected_peak_line'):

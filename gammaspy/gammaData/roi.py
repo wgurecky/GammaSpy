@@ -128,21 +128,6 @@ class Roi(object):
     def init_params(self, init_params):
         self._init_params = init_params
 
-    def set_peak_model(self):
-        """!
-        @brief Set ODR model
-        """
-        x = self.roi_data[:, 0]
-        y = self.roi_data[:, 1]
-        data = Data(x, y)
-        #
-        bgn = len(self.bg_model.params)
-        self.tot_model = lambda p, X: self.bg_model.eval(p[:bgn], X) + self.peak_model.eval(p[bgn:], X)
-        #self.tot_model = lambda p, X: self.bg_model.eval(p[:bgn], X)
-        print("Initial Model Params")
-        print(self._init_params)
-        self.odr_model = ODR(data, Model(self.tot_model), beta0=self._init_params, ifixb=[1, 1, 1, 0, 1], maxit=800, taufac=0.8)
-
     def fit(self):
         """!
         @brief Fit model via non-linear least squares.
@@ -198,7 +183,7 @@ class Roi(object):
         @brief Fit model via orthogonal dist regression.
         Simulataneously fits background and peak
         """
-        self.set_peak_model()
+        self.set_odr_peak_model()
         # 1SD uncert in fitted params = self.fit_output.sd_beta
         # fitted func values at input x = self.fit_output.y
         self.fit_output = self.odr_model.run()
@@ -206,6 +191,22 @@ class Roi(object):
         print(self.fit_output.pprint())
         print("================================")
         self.y_hat = self.tot_model(self.fit_output.beta, self.roi_data[:, 0])
+
+    def set_odr_peak_model(self):
+        """!
+        @brief Set ODR model
+        """
+        x = self.roi_data[:, 0]
+        y = self.roi_data[:, 1]
+        data = Data(x, y)
+        #
+        bgn = len(self.bg_model.params)
+        self.tot_model = lambda p, X: self.bg_model.eval(p[:bgn], X) + self.peak_model.eval(p[bgn:], X)
+        #self.tot_model = lambda p, X: self.bg_model.eval(p[:bgn], X)
+        print("Initial Model Params")
+        print(self._init_params)
+        self.odr_model = ODR(data, Model(self.tot_model), beta0=self._init_params, ifixb=[1, 1, 1, 0, 1], maxit=800, taufac=0.8)
+
 
     def fit_mcmc(self):
         """!

@@ -11,7 +11,9 @@ class LinModel(object):
     """!
     @brief Linear background model.
     """
-    def __init__(self, init_params=[0., 100.]):
+    def __init__(self, init_params=[0., 100.], **kwargs):
+        self.name = kwargs.pop("name", "linear")
+        self.bounds = ((-np.inf, -np.inf), (np.inf, np.inf))
         self._params = init_params
 
     @property

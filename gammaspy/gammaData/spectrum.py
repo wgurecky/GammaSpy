@@ -42,17 +42,21 @@ class GammaSpectrum(object):
         peak_locs = np.array(self.peak_bank.keys())
         return peak_locs
 
-    def find_cwt_peaks(self, widths=[5.0, 7.5, 10., 15., 20., 25.], **kwargs):
+    def find_cwt_peaks(self, **kwargs):
         """!
         @brief Automatic peak detection by the continuous wavelet transform method.
         """
-        noise = kwargs.get("noise_perc", 20)
-        min_snr = kwargs.get("min_snr", 1.5)
-        cut = kwargs.pop("cut", 40)  # max number of peaks to retain
-        cwt_peaks_idxs = find_peaks_cwt(self.spectrum[:, 1], widths, min_snr=min_snr, noise_perc=noise, **kwargs)
+        widths = np.linspace(4, 14, 40)
+        ei = kwargs.get("ei", 10.)
+        ef = kwargs.get("ef", 2000.)
+        min_snr = kwargs.get("min_snr", 1.2)
+        noise = kwargs.get("noise_perc", 7.)
+        mask = (self.spectrum[:, 0] > ei) & (self.spectrum[:, 0] < ef)
+        cut = kwargs.pop("cut", 80)  # max number of peaks to retain
+        cwt_peaks_idxs = find_peaks_cwt(self.spectrum[:, 1][mask], widths=widths, min_snr=min_snr, noise_perc=noise)
         print("N auto Peak Locations = %d" % len(cwt_peaks_idxs))
         print("-----------------------")
-        cwt_peaks = self.spectrum[cwt_peaks_idxs, 0]
+        cwt_peaks = self.spectrum[mask][cwt_peaks_idxs, 0]
         print(cwt_peaks)
         return cwt_peaks[:cut]
 

@@ -207,6 +207,117 @@
        <string>Peak List</string>
       </property>
      </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>1220</x>
+        <y>420</y>
+        <width>61</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>E0 (KeV)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>1220</x>
+        <y>450</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Ef (KeV)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_5">
+      <property name="geometry">
+       <rect>
+        <x>1220</x>
+        <y>510</y>
+        <width>62</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Noise Lvl</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_6">
+      <property name="geometry">
+       <rect>
+        <x>1220</x>
+        <y>480</y>
+        <width>62</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Min SNR</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="roi2">
+      <property name="geometry">
+       <rect>
+        <x>1280</x>
+        <y>370</y>
+        <width>113</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="roi1">
+      <property name="geometry">
+       <rect>
+        <x>1280</x>
+        <y>340</y>
+        <width>113</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_7">
+      <property name="geometry">
+       <rect>
+        <x>1290</x>
+        <y>320</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>ROI Control</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_8">
+      <property name="geometry">
+       <rect>
+        <x>1220</x>
+        <y>350</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>CR 2Div</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_9">
+      <property name="geometry">
+       <rect>
+        <x>1250</x>
+        <y>380</y>
+        <width>31</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Tail</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tabEff">
      <attribute name="title">

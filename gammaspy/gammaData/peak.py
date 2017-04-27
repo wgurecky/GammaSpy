@@ -18,8 +18,12 @@ class GaussModel(object):
     $b$ is the mean
     and $c$ is the std. deviation.
     """
-    def __init__(self, init_params=[1., 1., 1.]):
+    def __init__(self, init_params=[1., 1., 1.], **kwargs):
+        self.name = kwargs.pop("name", "gauss")
+        # ((min bounds), (max param bounds))
+        self.bounds = ((0., 0., 0.), (np.inf, np.inf, np.inf))
         self._params = init_params
+        self.model_trust = 1
 
     @property
     def params(self):
@@ -35,7 +39,8 @@ class GaussModel(object):
 
     def eval(self, params, x):
         """!
-        @brief Gauss model definition.
+        @brief Eval Gauss model for ODR pack.
+        ODR pack likes f([params], x) argument arrangement.
         @param params  Gaussian model parameter array (len=3)
         @param x np_array of abscissa to evaluate gauss model at
         @return np_array value of gauss model at specified points.
@@ -44,6 +49,12 @@ class GaussModel(object):
         return gauss_f
 
     def opti_eval(self, x, *params):
+        """!
+        @brief Identical to eval, with flipped argument positions.
+        Scipy optimization routines typically like f(x, *params) format.
+        @param x np_array of abscissa to evaluate gauss model at
+        @param params  Gaussian model parameter array (len=3)
+        """
         gauss_f = params[0] * np.exp((-1. * (x - params[1]) ** 2) / (2. * params[2] ** 2))
         return gauss_f
 
@@ -107,10 +118,13 @@ class GaussModel(object):
         return 2.35482 * params[2]
 
 class DblGaussModel(object):
-    def __init__(self, init_params=[1., 1., 1., 2., 2., 2.]):
+    def __init__(self, init_params=[1., 1., 1., 2., 2., 2.], **kwargs):
+        self.name = kwargs.pop("name", "dblgauss")
+        self.bounds = ((0., 0., 0., 0., 0., 0.), (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf))
         self._params = init_params
         self.gauss_1 = GaussModel(self._params[:3])
         self.gauss_2 = GaussModel(self._params[3:])
+        self.model_trust = 0.5
 
     @property
     def params(self):
@@ -125,6 +139,11 @@ class DblGaussModel(object):
             self._params = params
 
     def eval(self, params, x):
+        gauss_f_1 = self.gauss_1.eval(params[:3], x)
+        gauss_f_2 = self.gauss_2.eval(params[3:], x)
+        return gauss_f_1 + gauss_f_2
+
+    def opti_eval(self, x, *params):
         gauss_f_1 = self.gauss_1.eval(params[:3], x)
         gauss_f_2 = self.gauss_2.eval(params[3:], x)
         return gauss_f_1 + gauss_f_2
