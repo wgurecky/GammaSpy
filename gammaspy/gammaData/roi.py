@@ -135,9 +135,11 @@ class Roi(object):
         if np.count_nonzero(is_neighbor_mask) > 1 and self.enabled_peak_models["dblgauss"]:
             print("Double Gauss Model Enabled!")
             self.model = fm.FitModel(1, 2, [self._centroid, self._centroid])
-        if not self.enabled_peak_models["gauss"]:
+        elif not self.enabled_peak_models["gauss"]:
             print("Double Gauss Model Enabled!")
             self.model = fm.FitModel(1, 2, [self._centroid, self._centroid])
+        else:
+            self.model = fm.FitModel(1, 1, [self._centroid])
 
     def fit_new(self):
         """!
@@ -154,13 +156,33 @@ class Roi(object):
         msg += str(self.popt); msg += "\n "
         msg += "Coeff covar matrix: \n "
         msg += str(self.pcov); msg += "\n "
-        #self.y_hat = self.tot_model(self.popt, self.roi_data[:, 0])
         self.y_hat = self.model.eval(x)
-        msg += "================================ \n "
+        msg += "==================================== \n "
+        self.net_area_new()
+        self.get_peak_means()
+        self.get_peak_sigmas()
         return msg
 
     def net_area_new(self):
-        pass
+        """!
+        @brief Computes all peak areas and uncertainties.
+        """
+        self.net_area, self.peak_area_list = self.model.net_area()
+        self.net_area_uncert, self.peak_area_uncert_list = \
+            self.model.net_area_uncert(self.lbound, self.ubound, self.pcov)
+        print("Net Area = %f +/- %f" % (self.net_area, self.net_area_uncert))
+        print("Peak Areas: %s" % str(self.peak_area_list))
+        print("Peak Area Uncerts: %s" % str(self.peak_area_uncert_list))
+
+    def get_peak_means(self):
+        means = self.model.peak_means()
+        print("Peak Means: %s (KeV)" % str(means))
+        return means
+
+    def get_peak_sigmas(self):
+        sigmas = self.model.peak_sigmas()
+        print("Peak Std. Devs: %s (KeV)" % str(sigmas))
+        return sigmas
 
     def net_area(self):
         """!

@@ -75,33 +75,73 @@ class FitModel(object):
             output += model["model"].eval(np.array(self.model_params)[model["idxs"]], x)
         return output
 
-    def tot_area(self):
-        """!
-        @brief Total area under the model.
-        """
-        pass
-
     def net_area(self):
         """!
         @brief Area with background subtracted.
         """
-        pass
+        peak_area_list, net_area = [], 0.
+        for model_name, model in iteritems(self.model_bank):
+            if "gauss" in model_name:
+                area = model["model"].area(np.array(self.model_params)[model["idxs"]])
+                net_area += area
+                peak_area_list.append(area)
+        return net_area, peak_area_list
 
-    def jac_area(self):
+    def net_area_uncert(self, lbound, ubound, cov):
         """!
-        @brief Jacobian of the area.  Used for uncertainty calcs.
+        @brief Computes Jacobian of the area fn for uncertainty calcs.
+        @param lbound Float. Lower bound of ROI (for integral of bg model)
+        @param ubound Float. Upper bound of ROI (for integral of bg model)
+        @param covariance matrix
+        @return total area 1sigma uncert and list of individual submodel 1sigma uncerts
         """
-        pass
+        assert(cov.shape[0] == len(self.model_params))
+        assert(cov.shape[1] == len(self.model_params))
+        area_jac_all = np.array([])
+        for model_name, model in iteritems(self.model_bank):
+            if "gauss" in model_name:
+                # jacobian of a gaussian peak area
+                area_jac = model["model"].area_jac(np.array(self.model_params)[model["idxs"]])
+            else:
+                # jacobian of area under the bg model
+                area_jac = model["model"].int_jac(lbound, ubound, np.array(self.model_params)[model["idxs"]])
+            if len(area_jac.shape) == 2:
+                area_jac_all = np.concatenate((area_jac_all, area_jac[0]))
+            else:
+                area_jac_all = np.concatenate((area_jac_all, area_jac))
+        # std prop of uncetainty J * C * J.T
+        net_uncert = np.dot(area_jac_all, cov)
+        net_uncert = np.dot(net_uncert, area_jac_all)
+        peak_area_list = np.array(self.net_area()[1])
+        peak_area_ratio = peak_area_list / np.sum(peak_area_list)
+        peak_area_uncerts = net_uncert * (peak_area_ratio)
+        return np.sqrt(net_uncert), np.sqrt(peak_area_uncerts)
 
     def peak_means(self):
         """!
         @brief Mean of each subpeak
         """
-        pass
+        peak_means = []
+        for model_name, model in iteritems(self.model_bank):
+            if "gauss" in model_name:
+                # mean of gaussian peak
+                peak_means.append(np.array(self.model_params)[model["idxs"]][1])
+        return peak_means
 
-    def peak_net_areas(self):
+    def peak_sigmas(self):
         """!
-        @brief Area of each subpeak
+        @brief Mean of each subpeak
+        """
+        sigmas = []
+        for model_name, model in iteritems(self.model_bank):
+            if "gauss" in model_name:
+                # 1sd of gaussian peak
+                sigmas.append(np.abs(np.array(self.model_params)[model["idxs"]][2]))
+        return sigmas
+
+    def tot_area(self):
+        """!
+        @brief Total area under the model.
         """
         pass
 

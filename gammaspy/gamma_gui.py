@@ -64,6 +64,8 @@ class MainWindow(TemplateBaseClass):
         self.ui.pushClean.clicked.connect(self.clean_plot)
         self.ui.pushShowPeaks.clicked.connect(self.show_peak_locs)
         self.ui.toolAddPeak.clicked.connect(self.manual_add_peak)
+        self.ui.peak1.stateChanged.connect(self.peak_model_update)
+        self.ui.peak2.stateChanged.connect(self.peak_model_update)
 
     def setup_inputs(self):
         # defaults
@@ -256,6 +258,7 @@ class MainWindow(TemplateBaseClass):
             values = [self.spectrum.peak_bank[arg.data(0)].lbound,
                       self.spectrum.peak_bank[arg.data(0)].ubound]
             self.manual_roi(values)
+            self.peak_model_update()
 
     def update_selected_roi(self):
         updated_roi_bounds = self.selected_roi.getRegion()
@@ -287,6 +290,13 @@ class MainWindow(TemplateBaseClass):
             # redaw roi
             current_item = self.ui.listWidget.currentItem()
             self.list_item_clicked(current_item)
+
+    def peak_model_update(self):
+        if hasattr(self, 'selected_peak'):
+            self.selected_peak.enabled_peak_models["gauss"] = \
+                    self.ui.peak1.isChecked()
+            self.selected_peak.enabled_peak_models["dblgauss"] = \
+                    self.ui.peak2.isChecked()
 
     def import_file(self):
         """!
