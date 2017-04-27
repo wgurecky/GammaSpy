@@ -133,8 +133,10 @@ class Roi(object):
         """
         is_neighbor_mask = (all_peak_locs > self.lbound) & (all_peak_locs < self.ubound)
         if any(is_neighbor_mask) and self.enabled_peak_models["dblgauss"]:
+            print("Double Gauss Model Enabled!")
             self.model = fm.FitModel(1, 2, [self._centroid, self._centroid])
         if not self.enabled_peak_models["gauss"]:
+            print("Double Gauss Model Enabled!")
             self.model = fm.FitModel(1, 2, [self._centroid, self._centroid])
 
     def fit_new(self):
@@ -160,6 +162,27 @@ class Roi(object):
     def net_area_new(self):
         pass
 
+    def net_area(self):
+        """!
+        @brief Peak - Background
+        """
+        bgn = len(self.bg_model.params)
+        area_peak = self.peak_model.area(self.popt[bgn:])
+        area_bg = self.bg_model.integral(self.lbound, self.ubound, self.popt[:bgn])
+        net = area_peak # - area_bg
+        # uncertainty calc
+        area_peak_jac = self.peak_model.area_jac(self.popt[bgn:])
+        area_bg_jac = self.bg_model.int_jac(self.lbound, self.ubound, self.popt[:bgn])
+        if len(area_peak_jac.shape) == 2:
+            all_jac = np.concatenate((area_bg_jac[0], area_peak_jac[0]))
+        else:
+            all_jac = np.concatenate((area_bg_jac, area_peak_jac))
+        # std prop of uncetainty J * C * J.T
+        uncert = np.dot(all_jac, self.pcov)
+        uncert = np.dot(uncert, all_jac.T)
+        msg = "Area= %f +/- %f (1sigma) " % (net, np.sqrt(np.sum(uncert)))
+        return msg
+
     def fit(self):
         """!
         @brief Fit model via non-linear least squares.
@@ -181,27 +204,6 @@ class Roi(object):
         self.y_hat = self.tot_model(self.popt, self.roi_data[:, 0])
         msg += self.net_area(); msg += "\n "
         msg += "================================ \n "
-        return msg
-
-    def net_area(self):
-        """!
-        @brief Peak - Background
-        """
-        bgn = len(self.bg_model.params)
-        area_peak = self.peak_model.area(self.popt[bgn:])
-        area_bg = self.bg_model.integral(self.lbound, self.ubound, self.popt[:bgn])
-        net = area_peak # - area_bg
-        # uncertainty calc
-        area_peak_jac = self.peak_model.area_jac(self.popt[bgn:])
-        area_bg_jac = self.bg_model.int_jac(self.lbound, self.ubound, self.popt[:bgn])
-        if len(area_peak_jac.shape) == 2:
-            all_jac = np.concatenate((area_bg_jac[0], area_peak_jac[0]))
-        else:
-            all_jac = np.concatenate((area_bg_jac, area_peak_jac))
-        # std prop of uncetainty J * C * J.T
-        uncert = np.dot(all_jac, self.pcov)
-        uncert = np.dot(uncert, all_jac.T)
-        msg = "Area= %f +/- %f (1sigma) " % (net, np.sqrt(np.sum(uncert)))
         return msg
 
     def total_area(self):

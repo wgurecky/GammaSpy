@@ -271,6 +271,7 @@ class MainWindow(TemplateBaseClass):
     def fit_selected_peak(self):
         if hasattr(self, 'selected_peak'):
             # msg = self.selected_peak.fit()
+            self.selected_peak.check_neighboring_peaks(np.array(list(self.spectrum.peak_bank.keys())))
             msg = self.selected_peak.fit_new()
             y = self.selected_peak.y_hat
             x = self.selected_peak.roi_data[:, 0]
