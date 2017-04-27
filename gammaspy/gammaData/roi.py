@@ -132,7 +132,7 @@ class Roi(object):
         @param all_peak_locs 1d_array of all peak locations
         """
         is_neighbor_mask = (all_peak_locs > self.lbound) & (all_peak_locs < self.ubound)
-        if any(is_neighbor_mask) and self.enabled_peak_models["dblgauss"]:
+        if np.count_nonzero(is_neighbor_mask) > 1 and self.enabled_peak_models["dblgauss"]:
             print("Double Gauss Model Enabled!")
             self.model = fm.FitModel(1, 2, [self._centroid, self._centroid])
         if not self.enabled_peak_models["gauss"]:
