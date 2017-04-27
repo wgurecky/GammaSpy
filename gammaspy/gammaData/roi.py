@@ -157,6 +157,10 @@ class Roi(object):
         msg += "Coeff covar matrix: \n "
         msg += str(self.pcov); msg += "\n "
         self.y_hat = self.model.eval(x)
+        ss_tot = np.sum((self.y_hat - np.mean(y)) ** 2.)
+        ss_res = np.sum((self.y_hat - y) ** 2.)
+        r_sqrd = 1. - ss_res / ss_tot
+        msg += "R^2 = %f\n" % r_sqrd
         msg += "==================================== \n "
         self.net_area_new()
         self.get_peak_means()
@@ -168,8 +172,10 @@ class Roi(object):
         @brief Computes all peak areas and uncertainties.
         """
         self.net_area, self.peak_area_list = self.model.net_area()
-        self.net_area_uncert, self.peak_area_uncert_list = \
+        net_model_var, peak_area_var_list = \
             self.model.net_area_uncert(self.lbound, self.ubound, self.pcov)
+        self.net_area_uncert = np.sqrt(net_model_var + self.net_area)
+        self.peak_area_uncert_list = np.sqrt(np.array(peak_area_var_list) + np.array(self.peak_area_list))
         print("Net Area = %f +/- %f" % (self.net_area, self.net_area_uncert))
         print("Peak Areas: %s" % str(self.peak_area_list))
         print("Peak Area Uncerts: %s" % str(self.peak_area_uncert_list))

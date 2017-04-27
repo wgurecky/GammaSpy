@@ -115,7 +115,8 @@ class FitModel(object):
         peak_area_list = np.array(self.net_area()[1])
         peak_area_ratio = peak_area_list / np.sum(peak_area_list)
         peak_area_uncerts = net_uncert * (peak_area_ratio)
-        return np.sqrt(net_uncert), np.sqrt(peak_area_uncerts)
+        # return varience, not SD!
+        return net_uncert, peak_area_uncerts
 
     def peak_means(self):
         """!
