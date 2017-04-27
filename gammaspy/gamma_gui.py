@@ -270,7 +270,8 @@ class MainWindow(TemplateBaseClass):
 
     def fit_selected_peak(self):
         if hasattr(self, 'selected_peak'):
-            msg = self.selected_peak.fit()
+            # msg = self.selected_peak.fit()
+            msg = self.selected_peak.fit_new()
             y = self.selected_peak.y_hat
             x = self.selected_peak.roi_data[:, 0]
             fit_plot = pg.PlotCurveItem(x=x, y=y, pen='r')

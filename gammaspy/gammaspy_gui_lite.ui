@@ -318,6 +318,64 @@
        <string>Tail</string>
       </property>
      </widget>
+     <widget class="QCheckBox" name="peak1">
+      <property name="geometry">
+       <rect>
+        <x>1310</x>
+        <y>40</y>
+        <width>91</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>1 Peak</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="peak2">
+      <property name="geometry">
+       <rect>
+        <x>1310</x>
+        <y>70</y>
+        <width>91</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>2 Peak</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="bgOrder">
+      <property name="geometry">
+       <rect>
+        <x>1240</x>
+        <y>60</y>
+        <width>50</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>1</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_10">
+      <property name="geometry">
+       <rect>
+        <x>1230</x>
+        <y>40</y>
+        <width>62</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>bg Order</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tabEff">
      <attribute name="title">

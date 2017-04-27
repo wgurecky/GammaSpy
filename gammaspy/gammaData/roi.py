@@ -3,6 +3,7 @@
 Contains region of interest model def
 """
 from __future__ import division
+import gammaspy.gammaData.fitmodel as fm
 import gammaspy.gammaData.peak as peak
 import gammaspy.gammaData.bg as bg
 from scipy.odr import Model, Data, ODR
@@ -31,12 +32,14 @@ class Roi(object):
                           self._centroid - 1.,
                           self._centroid + 1.,
                           self._centroid + 12.]
+        self.enabled_peak_models = {"gauss": True, "dblgauss": True}
         self._peak_models = ["gauss"]
         self._bg_models = ["linear"]
         # composition
         self.peak_model = peak.GaussModel([100., self._centroid, 1.])
         self.bg_model = bg.LinModel()
         self._init_params = np.concatenate((self.bg_model.params, self.peak_model.params))
+        self.model = fm.FitModel(bg_order=1, n_peaks=1, peak_centers=[self._centroid])
         # data stor
         self.roi_data_orig = spectrum
         self.roi_data = np.array([])
@@ -100,13 +103,6 @@ class Roi(object):
         print("Lower Bound: %f, Upper Bound: %f" % (self.lbound, self.ubound))
 
     @property
-    def centroid(self):
-        """!
-        @brief Peak center
-        """
-        return self._centroid
-
-    @property
     def peak_models(self):
         """!
         @brief Peak models to consider when fitting.
@@ -118,7 +114,7 @@ class Roi(object):
         """!
         @brief Background models to consider when fitting.
         """
-        return self._peak_models
+        return self._bg_models
 
     @property
     def init_params(self):
@@ -127,6 +123,42 @@ class Roi(object):
     @init_params.setter
     def init_params(self, init_params):
         self._init_params = init_params
+
+    def check_neighboring_peaks(self, all_peak_locs):
+        """!
+        @brief Checks if any other peaks are inside the ROI.
+        If so, then try to fit a dblgauss model.
+        This should be run before the self.fit() routine is run.
+        @param all_peak_locs 1d_array of all peak locations
+        """
+        is_neighbor_mask = (all_peak_locs > self.lbound) & (all_peak_locs < self.ubound)
+        if any(is_neighbor_mask) and self.enabled_peak_models["dblgauss"]:
+            self.model = fm.FitModel(1, 2, [self._centroid, self._centroid])
+        if not self.enabled_peak_models["gauss"]:
+            self.model = fm.FitModel(1, 2, [self._centroid, self._centroid])
+
+    def fit_new(self):
+        """!
+        @brief Fits bg and peak model simultaneously using
+        non-lin least squars.
+        """
+        x = self.roi_data[:, 0]
+        y = self.roi_data[:, 1]
+        self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params)
+        self.perr = np.sqrt(np.diag(self.pcov))
+        self.model.set_params(self.popt)
+        msg = "============FIT NEW PEAK=============\n "
+        msg += "Optimal coeffs: \n "
+        msg += str(self.popt); msg += "\n "
+        msg += "Coeff covar matrix: \n "
+        msg += str(self.pcov); msg += "\n "
+        #self.y_hat = self.tot_model(self.popt, self.roi_data[:, 0])
+        self.y_hat = self.model.eval(x)
+        msg += "================================ \n "
+        return msg
+
+    def net_area_new(self):
+        pass
 
     def fit(self):
         """!
@@ -207,9 +239,27 @@ class Roi(object):
         print(self._init_params)
         self.odr_model = ODR(data, Model(self.tot_model), beta0=self._init_params, ifixb=[1, 1, 1, 0, 1], maxit=800, taufac=0.8)
 
-
     def fit_mcmc(self):
         """!
         @brief Fit peak by marcov chain monte carlo
         """
         pass
+
+    @property
+    def centroid(self):
+        """!
+        @brief Peak center
+        """
+        return self._centroid
+
+if __name__ == "__main__":
+    import gammaspy.gammaData.reader as rd
+    reader = rd.DataReader()
+    fname = "../../examples/data/NORM-H2O.CNF"
+    mdata, spec = reader.read(fname)
+    lbound, ubound = 230., 254.
+    mask = (spec[:, 0] > lbound) & (spec[:, 0] < ubound)
+    spec = spec[mask]
+    roi = Roi(spec, centroid=241.57)
+
+
