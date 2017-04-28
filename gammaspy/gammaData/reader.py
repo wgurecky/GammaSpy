@@ -56,7 +56,7 @@ class DataReader(object):
                 metadata['r_time'] = float(val)
             elif key.split(' ')[0] == 'energy':
                 metadata['e_cal'].append(float(val))
-        return [metadata, count_energy]
+        return [metadata, self.conv_counts_per_enregy(count_energy)]
 
     def conv_counts_per_enregy(self, count_energy):
         """!
