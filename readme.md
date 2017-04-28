@@ -18,8 +18,8 @@ Installation
 Depends:
 
 - numpy
-- scipy
 - h5py
+- scipy (>=0.19)
 - pyqt4.8+
 - numdifftools
 - pyqtgraph (https://github.com/pyqtgraph/pyqtgraph)

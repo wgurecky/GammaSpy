@@ -21,7 +21,7 @@ class FitModel(object):
         self.add_model(bg_model)
         for i in range(n_peaks):
             name = "gauss_" + str(i)
-            self.add_model(peak.GaussModel(init_params=[100., peak_centers[i], 1.],
+            self.add_model(peak.GaussModel(init_params=[1.e2, peak_centers[i], 1.0],
                                            name=name))
 
     def add_model(self, in_model):
@@ -50,7 +50,6 @@ class FitModel(object):
         """
         output = np.zeros(len(x))
         for model_name, model in iteritems(self.model_bank):
-            #output += model["model"].opti_eval(x, *params[model["idxs"]])
             output += model["model"].eval(np.array(params)[model["idxs"]], x)
         return output
 
@@ -120,6 +119,7 @@ class FitModel(object):
         assert(cov.shape[0] == len(self.model_params))
         assert(cov.shape[1] == len(self.model_params))
         area_jac_all = np.array([])
+        scaling_factor = 1.5
         for model_name, model in iteritems(self.model_bank):
             if "gauss" in model_name:
                 # jacobian of a gaussian peak area
@@ -128,12 +128,15 @@ class FitModel(object):
                 # jacobian of area under the bg model
                 avg_model_mean = np.array(self.peak_means())
                 avg_model_sd = np.array(self.peak_sigmas())
-                a_s = avg_model_mean - 3. * avg_model_sd
-                b_s = avg_model_mean + 3. * avg_model_sd
+                a_s = avg_model_mean - 2. * avg_model_sd
+                b_s = avg_model_mean + 2. * avg_model_sd
                 sd_markers = np.concatenate((a_s, b_s))
                 a, b = np.min(sd_markers), np.max(sd_markers)
+                scaling_factor = 1. + (b - a) / ((ubound - lbound) - (b - a))
                 print("a: %f, b: %f" % (a, b))
-                area_jac = model["model"].int_jac(lbound, ubound, np.array(self.model_params)[model["idxs"]])
+                print("peak/bg ratio: %f" % (scaling_factor - 1.))
+                assert(b > a)
+                area_jac = model["model"].int_jac(a, b, np.array(self.model_params)[model["idxs"]])
             if len(area_jac.shape) == 2:
                 area_jac_all = np.concatenate((area_jac_all, area_jac[0]))
             else:
@@ -145,7 +148,7 @@ class FitModel(object):
         peak_area_ratio = peak_area_list / np.sum(peak_area_list)
         peak_area_uncerts = net_uncert * (peak_area_ratio)
         # return varience, not SD!
-        return net_uncert, peak_area_uncerts
+        return net_uncert, peak_area_uncerts, scaling_factor
 
     def peak_means(self):
         """!

@@ -8,7 +8,7 @@ import gammaspy.gammaData.peak as peak
 import gammaspy.gammaData.bg as bg
 from scipy.odr import Model, Data, ODR
 from scipy.signal import savgol_filter
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, basinhopping, minimize
 import numpy as np
 np.set_printoptions(linewidth=200)
 
@@ -149,18 +149,17 @@ class Roi(object):
         msg = "============FIT NEW PEAK=============\n "
         x = self.roi_data[:, 0]
         y = self.roi_data[:, 1]
+        def hop_model(params):
+            return np.sum((self.model.opti_eval(x, *params) - y) ** 2.)
         try:
-            self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params, sigma=np.sqrt(y), absolute_sigma=True)
+            bhop_res = basinhopping(hop_model, x0=np.array(self.model.model_params), stepsize=0.1, T=50., minimizer_kwargs={"method": "L-BFGS-B"}, interval=20)
+            print("Basin hop optimal params guess: %s" % str(bhop_res.x))
+            self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=bhop_res.x, sigma=np.sqrt(y), absolute_sigma=True)
         except:
             print("Fit failed")
             msg += "FIT FAILED. ADJUST PEAK LOCATION MARKER \n"
             self.popt = self.model.model_params
             self.pcov = np.eye(len(self.popt))
-        #print(tuple(self.model.model_params_bounds))
-        #self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params,
-        #                                 bounds=tuple(self.model.model_params_bounds),
-        #                                 max_nfev=10000)
-        # self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params)
         self.perr = np.sqrt(np.diag(self.pcov))
         self.model.set_params(self.popt)
         msg += "Optimal coeffs: \n "
@@ -183,11 +182,11 @@ class Roi(object):
         @brief Computes all peak areas and uncertainties.
         """
         self.net_peak_area, self.peak_area_list = self.model.net_area()
-        self.tot_bg_area, self.peak_bg_list = self.model.bg_area(self.lbound, self.ubound)
-        net_model_var, peak_area_var_list = \
+        self.tot_bg_area, self.peak_bg_list = self.model.bg_area()
+        net_model_var, peak_area_var_list, bg_scale = \
             self.model.net_area_uncert(self.lbound, self.ubound, self.pcov)
-        self.net_peak_area_uncert = np.sqrt(net_model_var + self.net_peak_area + 1.*self.tot_bg_area)
-        self.peak_area_uncert_list = np.sqrt(np.array(peak_area_var_list) + np.array(self.peak_area_list) + 1.*np.array(self.peak_bg_list))
+        self.net_peak_area_uncert = np.sqrt(net_model_var + self.net_peak_area + bg_scale * self.tot_bg_area)
+        self.peak_area_uncert_list = np.sqrt(np.array(peak_area_var_list) + np.array(self.peak_area_list) + bg_scale * np.array(self.peak_bg_list))
         print("Net BG Area = %f" % self.tot_bg_area)
         print("Peak BG Areas = %s" % str(self.peak_bg_list))
         print("Net Area = %f +/- %f" % (self.net_peak_area, self.net_peak_area_uncert))

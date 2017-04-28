@@ -21,7 +21,7 @@ class GaussModel(object):
     def __init__(self, init_params=[1., 1., 1.], **kwargs):
         self.name = kwargs.pop("name", "gauss")
         # ((min bounds), (max param bounds))
-        self.bounds = ((0., 0., 0.), (np.inf, np.inf, np.inf))
+        self.bounds = ((0., 0., 0.), (np.inf, 3000., 15.))
         self._params = init_params
         self.model_trust = 1
 
