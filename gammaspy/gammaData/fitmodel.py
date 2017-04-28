@@ -87,6 +87,28 @@ class FitModel(object):
                 peak_area_list.append(area)
         return net_area, peak_area_list
 
+    def bg_area(self, lbound=None, ubound=None):
+        """!
+        @brief Estimates the number of background counts under the
+        peak.  This is found by integrating the background model for
+        +/- 3sigma from the mean of the peak (~99.7% of the peak)
+        @return Area of background
+        """
+        bg_areas = []
+        for model_name, model in iteritems(self.model_bank):
+            if "gauss" not in model_name:
+                avg_model_mean = np.array(self.peak_means())
+                avg_model_sd = np.array(self.peak_sigmas())
+                a_s = avg_model_mean - 3. * avg_model_sd
+                b_s = avg_model_mean + 3. * avg_model_sd
+                for a, b in zip(a_s, b_s):
+                    if lbound is None or ubound is None:
+                        bg_areas.append(model["model"].integral(a, b, self.model_params[model["idxs"]]))
+                    else:
+                        bg_areas.append(model["model"].integral(lbound, ubound, self.model_params[model["idxs"]]))
+        bg_areas = np.array(bg_areas)
+        return np.sum(bg_areas), bg_areas
+
     def net_area_uncert(self, lbound, ubound, cov):
         """!
         @brief Computes Jacobian of the area fn for uncertainty calcs.
@@ -104,6 +126,13 @@ class FitModel(object):
                 area_jac = model["model"].area_jac(np.array(self.model_params)[model["idxs"]])
             else:
                 # jacobian of area under the bg model
+                avg_model_mean = np.array(self.peak_means())
+                avg_model_sd = np.array(self.peak_sigmas())
+                a_s = avg_model_mean - 3. * avg_model_sd
+                b_s = avg_model_mean + 3. * avg_model_sd
+                sd_markers = np.concatenate((a_s, b_s))
+                a, b = np.min(sd_markers), np.max(sd_markers)
+                print("a: %f, b: %f" % (a, b))
                 area_jac = model["model"].int_jac(lbound, ubound, np.array(self.model_params)[model["idxs"]])
             if len(area_jac.shape) == 2:
                 area_jac_all = np.concatenate((area_jac_all, area_jac[0]))

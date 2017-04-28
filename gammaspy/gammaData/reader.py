@@ -58,6 +58,21 @@ class DataReader(object):
                 metadata['e_cal'].append(float(val))
         return [metadata, count_energy]
 
+    def conv_counts_per_enregy(self, count_energy):
+        """!
+        @brief Converts a E. vs N Counts to E vs Counts/energy.
+        This is required to get correct units when computing
+        integrals/derivs.
+        @param count_energy np_2darray in format: [[energy (kev), counts]]
+        @return np_2darray [[energy (kev), counts/energy (counts/keV)]]
+        """
+        energy = count_energy[:, 0]  # Kev
+        energy_bin_widths = energy[1:] - energy[:-1]
+        energy_bin_widths = np.append(energy_bin_widths[0], energy_bin_widths)
+        counts_per_energy = count_energy[:, 1] / energy_bin_widths
+        counts_per_energy_vs_energy = np.array([energy, counts_per_energy]).T
+        return counts_per_energy_vs_energy
+
     def _readHDF5(self, fname, chan=0):
         """!
         @brief Reads count vs energy data from HDF5 file and

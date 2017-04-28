@@ -108,7 +108,7 @@ class GaussModel(object):
         return hess_matrix
 
     def area_jac(self, params):
-        jac = nd.Jacobian(self.area)(params)
+        jac = nd.Jacobian(self.area, step=1e-6)(params)
         return jac
 
     def fwhm(self, params):

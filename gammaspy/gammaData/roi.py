@@ -146,13 +146,23 @@ class Roi(object):
         @brief Fits bg and peak model simultaneously using
         non-lin least squars.
         """
+        msg = "============FIT NEW PEAK=============\n "
         x = self.roi_data[:, 0]
         y = self.roi_data[:, 1]
-        self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params, sigma=np.sqrt(y), absolute_sigma=True)
-        #self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params)
+        try:
+            self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params, sigma=np.sqrt(y), absolute_sigma=True)
+        except:
+            print("Fit failed")
+            msg += "FIT FAILED. ADJUST PEAK LOCATION MARKER \n"
+            self.popt = self.model.model_params
+            self.pcov = np.eye(len(self.popt))
+        #print(tuple(self.model.model_params_bounds))
+        #self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params,
+        #                                 bounds=tuple(self.model.model_params_bounds),
+        #                                 max_nfev=10000)
+        # self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=self.model.model_params)
         self.perr = np.sqrt(np.diag(self.pcov))
         self.model.set_params(self.popt)
-        msg = "============FIT NEW PEAK=============\n "
         msg += "Optimal coeffs: \n "
         msg += str(self.popt); msg += "\n "
         msg += "Coeff covar matrix: \n "
@@ -172,12 +182,15 @@ class Roi(object):
         """!
         @brief Computes all peak areas and uncertainties.
         """
-        self.net_area, self.peak_area_list = self.model.net_area()
+        self.net_peak_area, self.peak_area_list = self.model.net_area()
+        self.tot_bg_area, self.peak_bg_list = self.model.bg_area(self.lbound, self.ubound)
         net_model_var, peak_area_var_list = \
             self.model.net_area_uncert(self.lbound, self.ubound, self.pcov)
-        self.net_area_uncert = np.sqrt(net_model_var + self.net_area)
-        self.peak_area_uncert_list = np.sqrt(np.array(peak_area_var_list) + np.array(self.peak_area_list))
-        print("Net Area = %f +/- %f" % (self.net_area, self.net_area_uncert))
+        self.net_peak_area_uncert = np.sqrt(net_model_var + self.net_peak_area + 1.*self.tot_bg_area)
+        self.peak_area_uncert_list = np.sqrt(np.array(peak_area_var_list) + np.array(self.peak_area_list) + 1.*np.array(self.peak_bg_list))
+        print("Net BG Area = %f" % self.tot_bg_area)
+        print("Peak BG Areas = %s" % str(self.peak_bg_list))
+        print("Net Area = %f +/- %f" % (self.net_peak_area, self.net_peak_area_uncert))
         print("Peak Areas: %s" % str(self.peak_area_list))
         print("Peak Area Uncerts: %s" % str(self.peak_area_uncert_list))
 

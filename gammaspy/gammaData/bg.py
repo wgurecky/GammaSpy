@@ -60,7 +60,7 @@ class LinModel(object):
         Where $C$ is the covar matrix and $H$ is the jacobian.
         """
         reduced_int = lambda p: self.integral(a, b, p)
-        jac = nd.Jacobian(reduced_int)(params)
+        jac = nd.Jacobian(reduced_int, step=1e-8)(params)
         return jac
 
 

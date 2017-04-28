@@ -306,6 +306,8 @@ class MainWindow(TemplateBaseClass):
         # read file
         dreader = reader.DataReader()
         mdata, edata = dreader.read(name)
+        # convert to (counts/kev) vs. energy
+        edata = dreader.conv_counts_per_enregy(edata)
         # init the spectrum
         self.spectrum = spectrum.GammaSpectrum(edata, mdata)
         self.clean_plot()
