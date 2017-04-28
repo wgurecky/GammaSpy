@@ -275,7 +275,8 @@ class MainWindow(TemplateBaseClass):
         if hasattr(self, 'selected_peak'):
             # msg = self.selected_peak.fit()
             self.selected_peak.check_neighboring_peaks(np.array(list(self.spectrum.peak_bank.keys())))
-            msg = self.selected_peak.fit_new()
+            maxiter, tempearture, stepsize = self.read_fit_settings()
+            msg = self.selected_peak.fit_new(tempearture, stepsize, maxiter)
             y = self.selected_peak.y_hat
             x = self.selected_peak.roi_data[:, 0]
             fit_plot = pg.PlotCurveItem(x=x, y=y, pen='r')
@@ -309,6 +310,16 @@ class MainWindow(TemplateBaseClass):
         # init the spectrum
         self.spectrum = spectrum.GammaSpectrum(edata, mdata)
         self.clean_plot()
+
+    def read_fit_settings(self):
+        """!
+        @brief Gets the fit settings from user input lines.
+        Optinally execute before running peak fit.
+        """
+        max_iter = int(self.ui.fit1.text())
+        tempearture = float(self.ui.fit2.text())
+        step = float(self.ui.fit3.text())
+        return max_iter, tempearture, step
 
     def save_file(self):
         """!

@@ -141,7 +141,7 @@ class Roi(object):
         else:
             self.model = fm.FitModel(1, 1, [self._centroid])
 
-    def fit_new(self):
+    def fit_new(self, temperature=1., stepsize=0.3, maxiter=100):
         """!
         @brief Fits bg and peak model simultaneously using
         non-lin least squars.
@@ -152,7 +152,11 @@ class Roi(object):
         def hop_model(params):
             return np.sum((self.model.opti_eval(x, *params) - y) ** 2.)
         try:
-            bhop_res = basinhopping(hop_model, x0=np.array(self.model.model_params), stepsize=0.1, T=50., minimizer_kwargs={"method": "L-BFGS-B"}, interval=20)
+            bhop_res = basinhopping(hop_model, x0=np.array(self.model.model_params),
+                                    stepsize=stepsize, T=temperature,
+                                    minimizer_kwargs={"method": "L-BFGS-B"},
+                                    niter=maxiter,
+                                    interval=20, disp=True)
             print("Basin hop optimal params guess: %s" % str(bhop_res.x))
             self.popt, self.pcov = curve_fit(self.model.opti_eval, x, y, p0=bhop_res.x, sigma=np.sqrt(y), absolute_sigma=True)
         except:
