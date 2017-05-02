@@ -44,6 +44,7 @@ class Roi(object):
         self.roi_data_orig = spectrum
         self.roi_data = np.array([])
         self.update_data(spectrum)
+        self.popt, self.pcov = None, None
 
     @property
     def lbound(self):
@@ -176,36 +177,38 @@ class Roi(object):
         r_sqrd = 1. - ss_res / ss_tot
         msg += "R^2 = %f\n" % r_sqrd
         msg += "==================================== \n "
-        self.net_area_new()
-        self.get_peak_means()
-        self.get_peak_sigmas()
+        msg += self.net_area_new()
+        msg += self.print_peak_means()
+        msg += self.print_peak_sigmas()
         return msg
 
     def net_area_new(self):
         """!
         @brief Computes all peak areas and uncertainties.
         """
+        msg = "-------------PEAK INFO------------------ \n"
         self.net_peak_area, self.peak_area_list = self.model.net_area()
         self.tot_bg_area, self.peak_bg_list = self.model.bg_area()
         net_model_var, peak_area_var_list, bg_scale = \
             self.model.net_area_uncert(self.lbound, self.ubound, self.pcov)
         self.net_peak_area_uncert = np.sqrt(net_model_var + self.net_peak_area + bg_scale * self.tot_bg_area)
         self.peak_area_uncert_list = np.sqrt(np.array(peak_area_var_list) + np.array(self.peak_area_list) + bg_scale * np.array(self.peak_bg_list))
-        print("Net BG Area = %f" % self.tot_bg_area)
-        print("Peak BG Areas = %s" % str(self.peak_bg_list))
-        print("Net Area = %f +/- %f" % (self.net_peak_area, self.net_peak_area_uncert))
-        print("Peak Areas: %s" % str(self.peak_area_list))
-        print("Peak Area Uncerts: %s" % str(self.peak_area_uncert_list))
+        msg += "Net Area = %f +/- %f" % (self.net_peak_area, self.net_peak_area_uncert) ; msg+= "\n"
+        msg += "Net BG Area = %f" % self.tot_bg_area; msg += "\n"
+        msg += "Peak BG Areas = %s" % str(self.peak_bg_list); msg += "\n"
+        msg += "Peak Areas: %s" % str(self.peak_area_list); msg += "\n"
+        msg += "Peak Area Uncerts: %s" % str(self.peak_area_uncert_list); msg += "\n"
+        return msg
 
-    def get_peak_means(self):
+    def print_peak_means(self):
         means = self.model.peak_means()
-        print("Peak Means: %s (KeV)" % str(means))
-        return means
+        msg = "Peak Means: %s (KeV)" % str(means); msg += "\n"
+        return msg
 
-    def get_peak_sigmas(self):
+    def print_peak_sigmas(self):
         sigmas = self.model.peak_sigmas()
-        print("Peak Std. Devs: %s (KeV)" % str(sigmas))
-        return sigmas
+        msg = "Peak Std. Devs: %s (KeV)" % str(sigmas); msg += "\n"
+        return msg
 
     def net_area(self):
         """!

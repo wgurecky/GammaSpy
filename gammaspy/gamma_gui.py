@@ -42,6 +42,7 @@ class MainWindow(TemplateBaseClass):
         """!
         @brief Connects menu items to actions
         """
+        self.ui.actionPeak_Report.triggered.connect(self.write_peak_report)
         self.ui.actionSave.triggered.connect(self.save_file)
         self.ui.actionExit_2.triggered.connect(self.exit_gui)
         self.ui.actionOpen.triggered.connect(self.import_file)
@@ -329,6 +330,12 @@ class MainWindow(TemplateBaseClass):
         dreader = reader.DataReader()
         metadata, spec = self.spectrum.metadata, self.spectrum.spectrum
         dreader.write(fname, metadata, spec)
+
+    def write_peak_report(self):
+        fname = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
+        msg = self.spectrum.pprint_peak_info()
+        with open(fname, "w") as text_file:
+            print(msg, file=text_file)
 
     def exit_gui(self):
         """!

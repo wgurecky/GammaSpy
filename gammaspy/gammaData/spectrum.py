@@ -6,6 +6,7 @@ import gammaspy.gammaData.peak as pk
 import gammaspy.gammaData.roi as roi
 import numpy as np
 from scipy.signal import find_peaks_cwt
+from six import iteritems
 
 
 class GammaSpectrum(object):
@@ -89,3 +90,14 @@ class GammaSpectrum(object):
             self.peak_bank[peak_loc].fit()
         except:
             print("Peak fitting failed.")
+
+    def pprint_peak_info(self):
+        msg = ""
+        for name, peak in iteritems(self.peak_bank):
+            try:
+                msg += peak.net_area_new()
+                msg += peak.print_peak_means()
+                msg += peak.print_peak_sigmas()
+            except:
+                pass
+        return msg
