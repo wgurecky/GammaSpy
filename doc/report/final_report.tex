@@ -1,0 +1,202 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University/School Laboratory Report
+% LaTeX Template
+% Version 3.1 (25/3/14)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[10pt]{article}
+\usepackage[version=3]{mhchem} % Package for chemical equation typesetting \ce{}
+\usepackage{siunitx} % Provides the \SI{}{} and \si{}
+\usepackage{graphicx} % Required for the inclusion of images
+\usepackage{natbib} % Required to change bibliography style to APA
+\usepackage{amsmath} % Required for some math elements 
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{cancel}
+\usepackage{float}
+\restylefloat{table}
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+\renewcommand{\labelenumi}{\alph{enumi}.} % Make numbering in the enumerate environment by letter rather than number (e.g. section 6)
+
+%\usepackage{times} % Uncomment to use the Times New Roman font
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{The Development of a Peak Fitting and Finding Software for Gamma Spectroscopy Applications \\
+\bigskip \large Final Project} % subtitle
+
+\author{William \textsc{Gurecky}} % Author name
+
+\date{\today} % Date for the report
+
+\begin{document}
+
+\maketitle % Insert the title, author and date
+
+\begin{center}
+\begin{tabular}{l r}
+Date Performed: & May 1, 2017 \\ % Date the experiment was performed
+Partners: &  N/A \\ % Partner names
+&  \\
+Instructor: & Dr.  Derek Haas % Instructor/supervisor
+\end{tabular}
+\end{center}
+
+% If you wish to include an abstract, uncomment the lines below
+%\begin{abstract}
+%\end{abstract}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 1
+%----------------------------------------------------------------------------------------
+
+\pagebreak
+\section*{Definitions}
+\label{definitions}
+\begin{description}
+
+\item[GUI]  Graphical User Interface.
+
+\item[ROI]  Region of interest.
+
+\item[FWHM]  Full width half maximum.
+
+\item[Spectroscopy]
+The study of interaction between electromagnetic (EM) radiation and matter.  Typically, the energy spectra of EM radiation is investigated in great detail to obtain information about the internal structure and type of matter inside a sample.
+
+\end{description}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 2
+%----------------------------------------------------------------------------------------
+\section{Introduction}
+In this work an open source tool to perform peak finding, fitting and visualization is developed.  These tasks
+are commonplace in the practice of gamma ray spectroscopy data post post processing.
+To this end, there are many available solutions.  The software
+package Cambio produced by Sandia National laboratory is one such example.  The vast majority
+of gamma ray peak post processing software is closed source and by nature is not easily extensible.
+Additionally, the current work addresses some shortcomings present in some of the traditional
+software, namely, the inability to deconvolve multiple nearby peaks and the lack of reliable automatic
+peak detection.  As a result of the current work, a software packaged entitled GammaSpy was developed in python.
+GammaSpy is freely available for download at: \url{https://github.com/wgurecky/GammaSpy}.  Though
+this software solution does not represent a truly novel solution to the aforementioned issues, it does
+provide a platform for students to easily analyze gamma spectra collected in the lab, and furthermore
+is easily modified and extended if additional features are desired.
+
+\section{Overview}
+
+GammaSpy utilizes non-linear curve fitting techniques found in the open literature and are
+freely available in open source python libraries.  To decompose nearby peaks, an iterative solution based
+on basin hopping is used which is a cousin of simulated annealing.  The automatic peak detection algorithm
+used in GammaSpy is based on the continuous wavelet transform rather than a derivative based approach to alleviate
+false negatives encountered when one attempts to find peaks passed on the smoothed derivatives of the original signal.  A discussion of how the software functions and how the
+user interacts with the GUI are provided in this document.
+
+\section{Features}
+
+The end user will interact with the underlaying numerical routines through a graphical
+user interface. The GUI allows the user to navigate the spectrum, add peaks, select ROI, fit peaks, and visualize
+the fitting results.
+
+\subsection{File Compatibility}
+GammaSpy can read a variety of file formats commonly used in other gamma spectroscopy softwares.
+\begin{itemize}
+    \item Canberra *.CNF
+    \item Canberra *.MCA
+    \item Rigaku *.DAT
+    \item Siemens *.UXD
+    \item *.csv
+    \item *.HDF5
+\end{itemize}
+This is essential for interoperability with data collection systems like Gini or Miestro.  The ability to read
+myriad data formats is provided by the excellent xylib python library available here: \url{xylib.sourceforge.net}. \\
+
+It is possible to save spectra and fitting results to the HDF5 format.  HDF5 is ideal for large data array storage as
+it supports on the fly compression of many data types thus saving storage space.  Additionally, HDF5 files can
+be read by many other plotting softwares and do not require a gamma spectroscopy software to open. \\
+
+An option to export fitted peak information to ASCII is also provided so that the user can optionally write a parser
+or simply copy/paste the peak fitting results into Excel. \\
+
+\section{Methods}
+
+\subsection{Peak Fitting}
+
+In the current implementation all peaks are assumed to be Gaussian or a linear combination of gaussian distributions, however it is possible to
+substitute more complex peak models in the future if required.
+The local peak background is modeled as linear.  When fitting a single peak, both the gaussian parameters and linear parameters are
+estimated simultaneously.  This gives rise to a nonlinear least squares (NLS) problem assuming the gaussian parameters are allowed to vary.
+Some constraints can be placed on the gaussian parameters such that only positive mean and height are
+allowed, however these constraints do not guarantee that the NLS problem will be free of local minima.
+
+In GammaSpy the NLS problem is cast as a general chi-square optimization problem.  The chi-squared objective function shown in equation \ref{err} is minimized:
+
+\begin{equation}
+    \chi^2 = \sum_i \frac{(y_i - \hat y_i)^2}{\sigma_{y_i}^2}
+    \label{err}
+\end{equation}
+Where $\hat y_i$ are predicted values from the target function $y(x_i|\alpha_1, .. \alpha_n)$ which has free model parameters
+$\{\alpha_1, ... \alpha_n\}$.  The squared differences are inversely weighted by the variance of
+each data sample.  This effectively upweights the importance of counts with low variance relative to counts with large variance.  In the case
+of a gamma spectrum the variance of each bin is equal to it's height: $\sigma_{y_i}^2 = y_i$. \\
+
+To minimize equation \ref{err}, newton's method is employed to find a local minimum of the objective function.  This however, does not
+gauntee to converge upon the global minimum in the case of NLS.  Instead, GammaSpy employs a basin hopping algorithm to
+jump out from a local minimum so that new (hopefully global) minima can be discovered.
+
+\subsubsection{Single Peak}
+Test
+
+\subsubsection{Double Peak}
+Test
+
+\subsection{Peak Detection}
+Test
+
+\subsection{ROI Detection}
+
+Test.
+
+%----------------------------------------------------------------------------------------
+%	SECTION 3
+%----------------------------------------------------------------------------------------
+
+\section{Results}
+
+Test. 
+
+%----------------------------------------------------------------------------------------
+%	SECTION 4
+%----------------------------------------------------------------------------------------
+\pagebreak
+\section{Conclusions and Discussion}
+
+The focus of this work was not to develop non-linear curve fitting techniques or improve upon the CWT algorithm,
+instead the motive to develop GammaSpy was to aggregate useful computational tools in a package
+targeted specifically at gamma spectroscopy.
+
+\pagebreak
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\bibliographystyle{apalike}
+
+\bibliography{sample}
+
+%----------------------------------------------------------------------------------------
+
+
+\end{document}
