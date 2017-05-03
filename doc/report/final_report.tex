@@ -121,7 +121,7 @@ GammaSpy can read a variety of file formats commonly used in other gamma spectro
     \item *.HDF5
 \end{itemize}
 This is essential for interoperability with data collection systems like Gini
-or Miestro.  The ability to read myriad data formats is provided by the
+or Maestro.  The ability to read myriad data formats is provided by the
 excellent xylib python library available here: \url{xylib.sourceforge.net}. \\
 
 It is possible to save spectra and fitting results to the HDF5 format.  HDF5 is
@@ -259,7 +259,7 @@ $\{\sigma_{\alpha_i} \forall i \}$ and then propagate the model parameter uncert
 The uncertainty in each fitted model parameter can be estimated by computing the Hessian of the $\chi^2$ objective
  function at the location of the global minimum.  This approximation is derived by computing the Taylor expansion of the objective function about
  the minimum and ignoring terms higher than order $O^2$.  See \cite{cvonline:2017} and \cite{gavin:2017} for a complete derivation.
-The Hessian is related to the covariance matrix by: test
+The Hessian is related to the covariance matrix by:
 \begin{equation}
    \bm C \approx (\bm H)^{-1}
 \end{equation}
@@ -360,13 +360,88 @@ that the second and third terms are approximately zero.
 A comparison between GammaSpy and Cambio for single peak net area calculation was performed
 to ascertain if the currently implemented algorithms performed as expected, atleast in
 the simple case of a single peak.
+The test spectrum used can be downloaded from: \url{https://github.com/wgurecky/GammaSpy/blob/master/examples/data/NORM-H2O.CNF}.
+A single peak located at $\approx$ 1120 (KeV) was selected for comparison.  The fitting results from
+GammaSpy and Cambio are presented in table \ref{table_1}.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline 
+Code & Energy	&FWHM	&Peak	&Peak	&Peak \\
+       & (keV)	&(keV)	&Area	&Uncert.	&Background\\ \hline \hline
+ GammaSpy &1119.82	& 1.911	&18293.64 &156.99 & 1285.73 \\
+ Cambio &1120.28	& 1.865	&18274.21 &253.61 & N/A \\
+\hline
+\end{tabular}
+\caption{Single peak comparison between GammaSpy and Cambio.}
+\end{center}
+\label{table_1}
+\end{table}
+
+The net area are in agreement with a relative difference of only $0.13\sigma$.  The uncertainty
+estimates, however, are significantly different.  It is hypothesized that this difference
+is due to the different peak and background functions used in Cambio vs GammaSpy. \\
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}{.55\textwidth}
+  \centering
+  \includegraphics[width=.90\linewidth]{images/gspy_ex.png}
+  \captionof{figure}{  GammaSpy fit.}
+  \label{fig1}
+\end{minipage}%
+\begin{minipage}{.55\textwidth}
+  \centering
+  \includegraphics[width=.95\linewidth]{images/cambio_ex.png}
+  \captionof{figure}{  Cambio fit.}
+  \label{fig2}
+\end{minipage}
+\end{figure}
+
+It should be noted that Cambio uses a cubic rather than liner background function and
+uses a exponentially modified Gaussian function for the peak rather than a pure Gaussian.
+These extra complexities (more coefficients to estimate in the model) would result in larger propagated uncertainties in the
+net peak area.  This is only a guess since the process by which Cambio estimates uncertainties is unknown.
+Since the fitted peak shapes are fundamentally different between the two codes, there is
+also a small discrepancy in the predicted FWHM. Additionally, GammaSpy estimates the peak
+mean to occure at a slightly smaller energy than Cambio due to the skewed lower tail of the peak
+dragging the mean with it. \\
+
+In the future, additional peak trial functions could be added to GammaSpy to achieve better agreement with Cambio.
 
 \subsection{Double Peak}
 For the double peak case a comparison with Cambio was not possible since the current
 version of Cambio cannot fit multiple nearby peaks.  The results of the following fit
 are thus unverified and meant as only a demonstration of GammaSpy's capabilities but
-not as measure of validity.
+not as measure of validity. \\
 
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline 
+   & Energy	&FWHM	&Peak	&Peak	&Peak \\
+       & (keV)	&(keV)	&Area	&Uncert.	&Background\\ \hline \hline
+ Peak 1&238.27 & 1.504	&  8477.06 & 158.98 & 7917.03 \\
+ peak 2&241.54	& 1.296	& 37884.82  &244.37 & 6653.34 \\
+\hline
+\end{tabular}
+\caption{Double peak fitting results from GammaSpy.}
+\end{center}
+\label{table_2}
+\end{table}
+
+A twin peak located at $\approx$ 240 (KeV) was selected as the target for double peak fitting.
+GammaSpy automatically detects that two peaks are nearby and within each other's ROI - this triggers
+a double Gaussian fit.  This behaviour can be adjusted if the user wishes to force a single or double
+peak fit.  See section \ref{ug} for details.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=8cm]{images/gspy2_ex.png}
+\caption{Double peak fit visualization performed in GammaSpy.}
+\label{gui}
+\end{figure}
 
 %----------------------------------------------------------------------------------------
 %	SECTION 4
@@ -377,7 +452,7 @@ not as measure of validity.
 The focus of this work was not to develop non-linear curve fitting techniques or improve upon the CWT algorithm,
 instead GammaSpy was developed to aggregate useful computational tools in a package
 targeted specifically at gamma spectroscopy. The developed package could be useful to those seeking
-an alternative to the Cambio or Miestro softwares.  GammaSpy may also be useful as a platform if a curious user
+an alternative to the Cambio or Maestro softwares.  GammaSpy may also be useful as a platform if a curious user
 wants to test a new peak fitting or finding algorithm.  The opportunity for
 future work is significant.  Additional non-Gaussian peak models could be implemented and the
 current linear background assumption could be relaxed.  Additionally, the overall ease of use of the
@@ -403,6 +478,7 @@ The main GUI window is presented in figure \ref{gui}.
     \item \textbf{Right Mouse + drag}:  Spectrum zoom.
     \item \textbf{Right Mouse}: Open graphical option menu.
 \end{itemize}
+To reset the view, \textbf{Right Click} the plot area and select \textbf{View All}.
 
 After peaks have been added to the peak list (see below), the selected peak can be
 cycled through by pressing the keyboard hotkeys:

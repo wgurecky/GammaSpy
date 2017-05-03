@@ -128,8 +128,8 @@ class FitModel(object):
                 # jacobian of area under the bg model
                 avg_model_mean = np.array(self.peak_means())
                 avg_model_sd = np.array(self.peak_sigmas())
-                a_s = avg_model_mean - 2. * avg_model_sd
-                b_s = avg_model_mean + 2. * avg_model_sd
+                a_s = avg_model_mean - 3. * avg_model_sd
+                b_s = avg_model_mean + 3. * avg_model_sd
                 sd_markers = np.concatenate((a_s, b_s))
                 a, b = np.min(sd_markers), np.max(sd_markers)
                 scaling_factor = 1. + (b - a) / ((ubound - lbound) - (b - a))

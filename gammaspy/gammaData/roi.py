@@ -191,6 +191,8 @@ class Roi(object):
         self.tot_bg_area, self.peak_bg_list = self.model.bg_area()
         net_model_var, peak_area_var_list, bg_scale = \
             self.model.net_area_uncert(self.lbound, self.ubound, self.pcov)
+        print("net model var: %f" % net_model_var)
+        print("BG scale: %f" % bg_scale)
         self.net_peak_area_uncert = np.sqrt(net_model_var + self.net_peak_area + bg_scale * self.tot_bg_area)
         self.peak_area_uncert_list = np.sqrt(np.array(peak_area_var_list) + np.array(self.peak_area_list) + bg_scale * np.array(self.peak_bg_list))
         msg += "Net Area = %f +/- %f" % (self.net_peak_area, self.net_peak_area_uncert) ; msg+= "\n"
