@@ -293,10 +293,10 @@ over smoothing smaller peaks such that the user set derivative detection thresho
 is missed.  This results in a plague of false negatives. 
 A CWT based approach does not suffer from these deficiencies. \\
 
-The CWT, $C_{a,b}(t)$, of a signal $s(t)$ is computed by equation \ref{cwt}.
+The CWT, $C_{a,b}(t)$, of a real valued  signal $s(t)$ is computed by equation \ref{cwt}.
 
 \begin{equation}
-    C(a,b) = \int_R s(t) \psi_{a,b}(t) dt
+    C(a,b) = \frac{1}{\sqrt a}\int_R s(t) \psi_{a,b}(\frac{t-b}{a}) dt
     \label{cwt}
 \end{equation}
 Where $\psi_{a,b}(t)$ is taken to be the mexican hat wavelet function shown in figure \ref{mhat}.
@@ -344,7 +344,7 @@ In the work performed by \cite{Du:2006}, the resilience of the CWT based method 
 In summary, the CWT can be decomposed into three parts:
 
 \begin{equation}
-    C(a,b) = \int P(t)\psi_{a,b}(t) dt + \int B(t) \psi_{a,b}(t) dt \int C \psi_{a,b} (t)dt
+    C(a,b) = \int P(t)\psi_{a,b}(t) dt + \int B(t) \psi_{a,b}(t) dt + \int C \psi_{a,b} (t)dt
 \end{equation}
 Where $P$ is the peak-only signal, $B$ is the background, and $C$ is a constant.  It can be shown
 that the second and third terms are approximately zero.
