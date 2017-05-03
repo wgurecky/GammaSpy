@@ -171,11 +171,11 @@ computed with respect to each free model parameter:
 
 With the $j^{th}$ iteration of newton's method given by:
 \begin{equation}
-    \bm \alpha^{j+1} = \bm \alpha^j +  \omega \frac{E'(\bm \alpha^j)}{ E''(\bm \alpha^j)}
+    \bm \alpha^{j+1} = \bm \alpha^j -  \omega \frac{E'(\bm \alpha^j)}{ E''(\bm \alpha^j)}
 \end{equation}
 Where $E'$ is the Jacobian and $E''$ is the Hessian of the objective function with
 respect to the free parameters, $\bm{\alpha}$.  The partial derivatives are estimated using
-central finite differences as is implemented in the numdifftools python library (\url{pypi.python.org/pypi/Numdifftools}). $\omega$ is a successive over
+central finite differences as is implemented in the numdifftools python library (\url{https://pypi.python.org/pypi/Numdifftools}). $\omega$ is a successive over
 relaxation parameter that helps damp oscillations about the minimum when set $<1.$, and is
 typically set to 0.9 in GammaSpy.  Newtons method is terminated when:
 \begin{equation}
@@ -202,7 +202,7 @@ probability equal to:
 Where $T$ is the annealing temperature and is a user set parameter.  This parameter obviously
 effects how likely it is to tunnel out of a local minima even if the surrounding environment may
 be fraught with other local minimum greater in magnitude than the current basin.
-GammaSpy uses a free implementation of this algorithm provided by the scipy library (\url{docs.scipy.org/doc/scipy-0.19.0}).
+GammaSpy uses a free implementation of this algorithm provided by the scipy library (\url{https://docs.scipy.org/doc}).
 The basin hopping method is described in great detail by \cite{Wales:1997}.
 
 \subsubsection{Net Area Calculation}
