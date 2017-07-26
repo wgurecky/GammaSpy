@@ -61,4 +61,4 @@ Thanks to xylib (ref.) GammaSpy can import energy spectra in the following data 
 License
 =======
 
-MIT
+GPLv3

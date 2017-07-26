@@ -9,7 +9,7 @@ setup(name='GammaSpy',
       test_suite="tests",
       install_requires=['numpy>=1.8.0', 'h5py>=2.2.0', 'scipy>=0.19', 'numdifftools', 'setuptools', 'xylib-py', 'pyqtgraph'],
       package_data={'': ['*.txt']},
-      license='MIT',
+      license='GPLv3',
       author_email='william.gurecky@utexas.edu',
       entry_points={
           'console_scripts': [
